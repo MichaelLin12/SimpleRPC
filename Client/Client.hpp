@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Serialzer.hpp"
 
 class Client{
 public:
@@ -18,4 +19,7 @@ public:
             return result;
         }
     }
+
+private:
+    Serializer serializer;
 };
