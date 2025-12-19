@@ -20,14 +20,17 @@
 class Serializer{
 public:
     template<typename ... Args>
-    Message serialize(const std::string& functionName, Args&&... args){
+    Message serialize(const boost::uuids::uuid& id, const std::string& functionName, Args&&... args){
         size_t size = functionName.size() + (sizeof(Args) + ...);
-        Message data{size};
+        Message data{id, size};
         (encode<Args>(data,args),...);
         return data;
     }
 
     Serializer();
+    Serializer(const Serializer& other)=delete;
+    Serializer(Serializer&& other) noexcept;
+    Serializer& operator=(const Serializer& other)=delete;
+    Serializer& operator=(Serializer&& other) noexcept;
 
-private:
 };

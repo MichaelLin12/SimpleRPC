@@ -17,7 +17,7 @@ public:
     Return call(const std::string& functionName, Args&& ... args){
 
         //1.Serialize the data
-        Message data = serializer.serialize<Args...>(functionName,std::forward<Args>(args)...);
+        Message data = serializer.serialize<Args...>(this->id,functionName,std::forward<Args>(args)...);
         if constexpr (std::is_void_v<Return>) {
             // 2. Send data over --> expect an OK reply
             return;
@@ -27,9 +27,14 @@ public:
         }
     }
 
+    Client(const Client& other) = delete;
+    Client(Client&& other) noexcept;
+    Client& operator=(const Client& other) = delete;
+    Client& operator=(Client&& other) = delete;
+
 private:
     Serializer serializer;
-    boost::uuids::uuid id;
+    boost::uuids::uuid id; // need to be able to pass this down to the message obj
     //socket for client
     //maybe a logger obj ... but I don't now ... we want to be 
     //able to enable/disable it based on the preprocessor/compiler

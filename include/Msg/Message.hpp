@@ -4,11 +4,12 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-// Message class is immutable
+// Message class is only movable
+// need to pass down uuids to construction
 
 class Message{
 public:
-    explicit Message(std::size_t size);
+    explicit Message(boost::uuids::uuid clientID, std::size_t size);
 
     template<typename T>
     requires (std::integral<T>)
@@ -31,4 +32,5 @@ private:
     void* buffer;
     void* curr;
     boost::uuids::uuid id;
+    size_t size;
 };
