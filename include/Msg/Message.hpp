@@ -1,5 +1,6 @@
 #pragma once
 #include <concepts>
+#include <string>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -16,6 +17,14 @@ public:
     void add(T data){
         std::memcpy(curr,&data,sizeof(data));
         curr+=sizeof(data);
+    }
+
+    template<typename T>
+    requires (std::same_as<T,std::string>)
+    void add(T data){
+        for(char ix: data){
+            add(ix);
+        }
     }
 
     ~Message();
