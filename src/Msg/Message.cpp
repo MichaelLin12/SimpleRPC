@@ -24,19 +24,11 @@ Message::Message(boost::uuids::uuid clientID, std::size_t size)
     curr+=sizeof(v);
 
     boost::uuids::uuid cliID = clientID;
-    if constexpr(std::endian::native == std::endian::little){
-        cliID = std::byteswap(cliID);
-    }
-
-    std::memcpy(curr,&v,sizeof(cliID));
+    std::memcpy(curr,&cliID,sizeof(cliID));
     curr+=sizeof(cliID);
 
     boost::uuids::uuid msgID = this->id;
-    if constexpr(std::endian::native == std::endian::little){
-        msgID = std::byteswap(msgID);
-    }
-
-    std::memcpy(curr,&v,sizeof(msgID));
+    std::memcpy(curr,&msgID,sizeof(msgID));
     curr+=sizeof(msgID);
 }
 
@@ -71,4 +63,20 @@ Message::Message(Message&& other) noexcept
     other.buffer = nullptr;
     other.curr = nullptr;
     other.size = 0;
+}
+
+char* Message::getBuffer(){
+    return this->buffer;
+}
+
+char* Message::getCurr(){
+    return this->curr;
+}
+
+size_t Message::getSize(){
+    return this->size;
+}
+
+boost::uuids::uuid Message::getID(){
+    return this->id;
 }

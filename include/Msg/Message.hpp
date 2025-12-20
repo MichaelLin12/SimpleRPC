@@ -20,17 +20,19 @@ public:
 
     ~Message();
 
-    //no copy's
     Message(const Message&) = delete;
     Message& operator=(const Message&) = delete;
-
-    // only moves ie. transfer of ownership
     Message(Message&& other) noexcept;
     Message& operator=(Message&& other) noexcept;
 
+    char* getBuffer();
+    char* getCurr();
+    size_t getSize();
+    boost::uuids::uuid getID();
+    
 private:
-    void* buffer;
-    void* curr;
+    char* buffer;
+    char* curr;
     boost::uuids::uuid id;
     size_t size;
 };
