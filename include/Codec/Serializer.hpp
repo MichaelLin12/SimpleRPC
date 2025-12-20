@@ -1,10 +1,10 @@
 #pragma once
 #include <string>
+#include <type_traits>
 #include "Msg/Message.hpp"
 #include "Utility/Encoder.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 /*
 * https://insujang.github.io/2022-03-12/implementing-basic-rpc-with-c-20/
@@ -22,18 +22,18 @@ class Serializer{
 public:
     template<typename ... Args>
     Message serialize(const boost::uuids::uuid& id, std::string& functionName, Args&&... args){
-        size_t size = functionName.size() + (sizeof(Args) + ...);
+        size_t size = sizeof(size_t) + functionName.size() + (sizeof(Args) + ...);
         Message data{id, size};
-        encode<size_t>(functionName.size());
-        encode<std::string>(functionName);
-        (encode<Args>(data,args),...);
+        encode<size_t>(data,functionName.size());
+        encode<std::string>(data,functionName);
+        (encode<std::decay_t<Args>>(data,args),...);
         return data;
     }
 
-    Serializer();
+    Serializer()=default;
     Serializer(const Serializer& other)=delete;
-    Serializer(Serializer&& other) noexcept;
+    Serializer(Serializer&& other) noexcept = default;
     Serializer& operator=(const Serializer& other)=delete;
-    Serializer& operator=(Serializer&& other) noexcept;
+    Serializer& operator=(Serializer&& other) noexcept = default;
 
 };
