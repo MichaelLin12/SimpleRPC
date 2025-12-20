@@ -5,3 +5,6 @@ build
 *.o
 *.so
 *.a
+
+#ignore vscode configurations
+.vscode
