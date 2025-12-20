@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "Msg/Message.hpp"
+#include "Utility/Encoder.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -20,9 +21,11 @@
 class Serializer{
 public:
     template<typename ... Args>
-    Message serialize(const boost::uuids::uuid& id, const std::string& functionName, Args&&... args){
+    Message serialize(const boost::uuids::uuid& id, std::string& functionName, Args&&... args){
         size_t size = functionName.size() + (sizeof(Args) + ...);
         Message data{id, size};
+        encode<size_t>(functionName.size());
+        encode<std::string>(functionName);
         (encode<Args>(data,args),...);
         return data;
     }
