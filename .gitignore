@@ -1,0 +1,7 @@
+#ignore all build directories
+build
+
+# ignore all binaries and object files
+*.o
+*.so
+*.a
