@@ -10,10 +10,10 @@
 //https://en.cppreference.com/w/cpp/types/is_integral.html
 //https://en.cppreference.com/w/cpp/types/endian.html
 //https://en.cppreference.com/w/cpp/numeric/byteswap.html
-template<typename T, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T,bool>,int> = 0>
+template<typename T, std::enable_if_t<std::is_integral_v<T> && sizeof(T) != 1,int> = 0>
 void encode(Message& msg, const T data){
-    static_assert(
-    std::numeric_limits<T>::is_signed?std::numeric_limits<T>::digits + 1 == sizeof(T) * CHAR_BIT:std::numeric_limits<T>::digits == sizeof(T) * CHAR_BIT,"T must have no padding bits");
+    //ensure no padding bit
+    static_assert(std::numeric_limits<T>::is_signed?std::numeric_limits<T>::digits + 1 == sizeof(T) * CHAR_BIT:std::numeric_limits<T>::digits == sizeof(T) * CHAR_BIT,"T must have no padding bits");
     if constexpr (std::endian::native == std::endian::little){
         msg.add(std::byteswap(data));
     }else{
@@ -21,8 +21,13 @@ void encode(Message& msg, const T data){
     }
 }
 
+template<typename T, std::enable_if_t<std::is_integral_v<T> && sizeof(T) == 1,int> = 0>
+void encode(Message& msg, const T data){
+    msg.add(data);
+}
 
-template<typename T, std::enable_if_t<std::is_same_v<T,bool> || std::is_same_v<T,std::string>,int> = 0>
+
+template<typename T, std::enable_if_t<std::is_same_v<T,std::string>,int> = 0>
 void encode(Message& msg, const T data){
     msg.add(data);
 }
@@ -32,3 +37,5 @@ template<typename T, std::enable_if_t<std::is_floating_point_v<T>,int> = 0>
 void encoder(Message& msg, T& data){
     // TODO
 }
+
+//test this implementation to ensure it works
