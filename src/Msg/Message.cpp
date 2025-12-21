@@ -77,6 +77,18 @@ size_t Message::getSize(){
     return this->size;
 }
 
+char* Message::getBuffer() const{
+    return this->buffer;
+}
+
+char* Message::getCurr() const{
+    return this->curr;
+}
+
+size_t Message::getSize() const{
+    return this->size;
+}
+
 boost::uuids::uuid Message::getID(){
     return this->id;
 }

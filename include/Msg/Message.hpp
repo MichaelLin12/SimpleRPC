@@ -7,6 +7,8 @@
 
 // Message class is only movable
 // need to pass down uuids to construction
+// need to generalize strings
+// knowing size at compile time would help us prefetch all the heap data that we need
 
 class Message{
 public:
@@ -34,9 +36,13 @@ public:
     Message(Message&& other) noexcept;
     Message& operator=(Message&& other) noexcept;
 
-    char* getBuffer();
+    char* getBuffer() ;
     char* getCurr();
     size_t getSize();
+
+    char* getBuffer() const;
+    char* getCurr() const;
+    size_t getSize() const;
     boost::uuids::uuid getID();
     
 private:
