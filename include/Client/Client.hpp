@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include "Codec/Serializer.hpp"
+#include "Utility/Error.hpp"
+#include <expected>
 #include "Msg/Message.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -11,19 +13,18 @@
 // Only support integral types and strings(kinda ... only for function name (need a better way for the general case))
 class Client{
 public:
-    Client(const std::string addr);
-
+    static std::expected<Client,ERROR> create(const std::string& addr);
 
     // Function templates (including template member functions) must be defined 
     // in the header, not just declared.
     template<typename Return, typename... Args>
-    Return call(const std::string& functionName, Args&& ... args){
-
-        //1.Serialize the data
+    std::expected<Return,ERROR> call(const std::string& functionName, Args&& ... args){
         Message data = serializer.serialize<Args...>(this->id,functionName,std::forward<Args>(args)...);
-        send();
-        Return result = receive();
-        return result;
+        std::expected<void,ERROR> rt = send();
+        if(rt) [[unlikely]] {
+            return std::unexpected{rt.error()};
+        }
+        return receive();
     }
 
     ~Client();
@@ -33,22 +34,20 @@ public:
     Client& operator=(const Client& other) = delete;
     Client& operator=(Client&& other) = delete;
 
-    void snd(const Message& m);
+    std::expected<void,ERROR> snd(const Message& m);
 
     template<typename Return>
-    Return receive(){
+    std::expected<Return,ERROR> receive(){
         char* buf[sizeof(Return)];
         ssize_t totalRecv = 0;
         ssize_t bytesRecv = 0;
 
         while (totalRecv < sizeof(Return)) {
             bytesRecv = recv(this->soc, buf + totalRecv, sizeof(Return) - totalRecv, 0);
-            if (bytesRecv == 0) {
-                // Connection closed cleanly
-                break;
-            } else if (bytesRecv == -1) {
-                perror("recv");
-                break;
+            if (bytesRecv == 0) [[unlikely]] {
+                return std::expected{std::unexpect,ERROR::CONN_CLOSED};
+            } else if (bytesRecv == -1) [[unlikely]] {
+                return std::expected{std::unexpect, ERROR::RECV_FAILURE};
             }
             totalRecv += bytesRecv;
         }
@@ -57,6 +56,9 @@ public:
     }
 
 private:
+
+    Client();
+
     Serializer serializer;
     boost::uuids::uuid id;
     int soc;

@@ -1,4 +1,6 @@
 #include "Client/Client.hpp"
+#include "Utility/Error.hpp"
+#include <expected>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -10,10 +12,11 @@
 
 // at some point you should look into scatter and gather io and look at implementing that
 
-Client::Client(const std::string addr):serializer{},id{},soc{0}{
+std::expected<Client,ERROR> Client::create(const std::string& addr){
+    Client c;
+    std::expected<Client,ERROR> ret = std::unexpected(ERROR::SUCCESS);
     boost::uuids::random_generator gen;
-    this->id = gen();
-
+    c.id = gen();
     int status;
     struct addrinfo hints;
     struct addrinfo* res;
@@ -29,29 +32,29 @@ Client::Client(const std::string addr):serializer{},id{},soc{0}{
 
     struct addrinfo* p;
     for(p = res; p != NULL; p = p->ai_next) {
-        this->soc = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-        if(this->soc == -1) [[unlikely]] {
-            perror("client: socket");
+        c.soc = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+        if(c.soc == -1) [[unlikely]] {
             continue;
         }
-
-
-        if (connect(this->soc, p->ai_addr, p->ai_addrlen) == -1) {
-            perror("client: connect");
-            close(this->soc);
+        if (connect(c.soc, p->ai_addr, p->ai_addrlen) == -1) [[unlikely]] {
+            close(c.soc);
             continue;
         }
-
         break;
     }
 
     if (p == NULL) [[unlikely]] {
-        fprintf(stderr, "client: failed to connect\n");
-        exit(2);
+        ret = std::unexpected(ERROR::CONN_FAILED);
     }
 
     freeaddrinfo(res);
+    if(ret.error() == ERROR::SUCCESS) [[likely]] {
+        ret.emplace(std::move(c));
+    }
+    return ret;
 }
+
+Client::Client():serializer{},id{},soc{0}{}
 
 Client::~Client(){
     close(this->soc); 
@@ -71,20 +74,19 @@ Client& Client::operator=(Client&& other){
     return *this;
 }
 
-void Client::snd(const Message& m){
+std::expected<void,ERROR> Client::snd(const Message& m){
 
     ssize_t bytes = 0;
     size_t totalSent = 0;
     size_t size = m.getSize();
     char* buffer = m.getBuffer();
     while(totalSent < static_cast<ssize_t>(size)){ // could use do while loop
-        bytes = send(this->soc, buffer + totalSent, size - bytes, 0);
+        bytes = send(this->soc, buffer + totalSent, size - totalSent, 0);
         if(bytes == -1){
-            perror("send");
-            break;
+            return std::expected<void,ERROR>{std::unexpect,ERROR::SEND_FAILURE};
         }
         totalSent += bytes;
     }
 
-    return;
+    return std::expected<void,ERROR>{};
 }
