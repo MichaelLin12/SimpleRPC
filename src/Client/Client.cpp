@@ -12,6 +12,8 @@
 
 // at some point you should look into scatter and gather io and look at implementing that
 
+// WE NEED TO SEND THE CLIENTS IP POTENTIALLY
+
 std::expected<Client,ERROR> Client::create(const std::string& addr){
     Client c;
     std::expected<Client,ERROR> ret = std::unexpected(ERROR::SUCCESS);
