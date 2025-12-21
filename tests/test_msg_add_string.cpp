@@ -5,7 +5,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-int main(int argc, char** argv){
+int main(){
     boost::uuids::random_generator gen;
     boost::uuids::uuid id = gen();
     std::string funcName{"add"};
@@ -17,7 +17,7 @@ int main(int argc, char** argv){
 
     auto b = static_cast<char*>(m.getBuffer());
     auto c = static_cast<char*>(m.getCurr());
-    if(c-b == 2*sizeof(boost::uuids::uuid) + sizeof(size_t) + size){
+    if(static_cast<unsigned long>(c-b) == 2*sizeof(boost::uuids::uuid) + sizeof(size_t) + size){
         std::cout << "\033[032m" << std::endl;
         std::cout << "[ SUCCESS ]" << std::endl;
         std::cout << "EXPECTED: " << 2*sizeof(boost::uuids::uuid) + sizeof(size_t) + size<< std::endl;

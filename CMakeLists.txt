@@ -11,8 +11,8 @@ add_library(Serializer STATIC src/Codec/Serializer.cpp)
 target_include_directories(Serializer PUBLIC include)
 
 add_executable(test_msg_add_integral tests/test_msg_add_integral.cpp)
-target_compile_options(test_msg_add_string PRIVATE -O0 -fsanitize=address -g -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror)
-target_link_options(test_msg_add_string PRIVATE -fsanitize=address)
+target_compile_options(test_msg_add_integral PRIVATE -O0 -fsanitize=address -g -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror)
+target_link_options(test_msg_add_integral PRIVATE -fsanitize=address)
 target_link_libraries(test_msg_add_integral PRIVATE Message)
 
 add_executable(test_msg_add_string tests/test_msg_add_string.cpp)

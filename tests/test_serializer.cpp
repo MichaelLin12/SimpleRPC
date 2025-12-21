@@ -6,7 +6,7 @@
 #include "Codec/Serializer.hpp"
 #include "Msg/Message.hpp"
 
-int main(int argv, char** argc){
+int main(){
     boost::uuids::random_generator gen;
     boost::uuids::uuid id = gen();
     Serializer s{};
@@ -17,7 +17,7 @@ int main(int argv, char** argc){
     auto x = m.getBuffer();
     auto y = m.getCurr();
 
-    if(y-x== 2*sizeof(boost::uuids::uuid) + sizeof(size_t) + sizeof(a) + sizeof(b) + funcName.size() + sizeof(size_t)){
+    if(static_cast<unsigned long>(y-x)== 2*sizeof(boost::uuids::uuid) + sizeof(size_t) + sizeof(a) + sizeof(b) + funcName.size() + sizeof(size_t)){
         std::cout << "\033[032m" << std::endl;
         std::cout << "[ SUCCESS ]" << std::endl;
         std::cout << "EXPECTED: " << 2*sizeof(boost::uuids::uuid) + sizeof(size_t) + sizeof(a) + sizeof(b) + funcName.size() + sizeof(size_t)<< std::endl;
