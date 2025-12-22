@@ -7,6 +7,10 @@
 class Deserializer{
 public:
     Deserializer()=default;
+    Deserializer(const Deserializer& other)=delete;
+    Deserializer(Deserializer&& other)=default;
+    Deserializer& operator=(const Deserializer& other)=delete;
+    Deserializer& operator=(Deserializer&& other)=default;
 
     template<typename Arg>
     requires (std::integral<Arg>)
@@ -18,8 +22,7 @@ public:
         }
         return ret;
     }
+
 };
 
-// need move semantics as default
-// delete copy semantics
 // build tests for this
