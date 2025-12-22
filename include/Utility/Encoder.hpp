@@ -38,4 +38,3 @@ void encoder(Message& msg, T& data){
     // TODO
 }
 
-//test this implementation to ensure it works
