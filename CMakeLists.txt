@@ -10,6 +10,9 @@ target_include_directories(Message PUBLIC include)
 add_library(Serializer STATIC src/Codec/Serializer.cpp)
 target_include_directories(Serializer PUBLIC include)
 
+add_library(Deserializer STATIC src/Codec/Deserializer.cpp)
+target_include_directories(Deserializer PUBLIC include)
+
 add_executable(test_msg_add_integral tests/test_msg_add_integral.cpp)
 target_compile_options(test_msg_add_integral PUBLIC -O0 -fsanitize=address -g -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror)
 target_link_options(test_msg_add_integral PUBLIC -fsanitize=address)
@@ -43,3 +46,8 @@ target_compile_options(test_encoder_string PUBLIC -O0 -fsanitize=address -g -Wal
 target_link_options(test_encoder_string PUBLIC -fsanitize=address)
 target_link_libraries(test_encoder_string PUBLIC Message)
 target_include_directories(test_encoder_string PUBLIC include)
+
+add_executable(test_deserialize_return tests/test_deserialize_return.cpp)
+target_compile_options(test_deserialize_return PUBLIC -O0 -fsanitize=address -g -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror)
+target_link_options(test_deserialize_return PUBLIC -fsanitize=address)
+target_link_libraries(test_deserialize_return PUBLIC Deserializer Message)
