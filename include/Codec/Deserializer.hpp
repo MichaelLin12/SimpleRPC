@@ -14,7 +14,7 @@ public:
 
     template<typename Arg>
     requires (std::integral<Arg>)
-    Arg deserializeRet(const char* buffer){
+    Arg deserialize(const char* buffer){
         Arg ret{};
         std::memcpy(&ret,buffer,sizeof(Arg));
         if constexpr(sizeof(std::decay_t<Arg>) > 1){
