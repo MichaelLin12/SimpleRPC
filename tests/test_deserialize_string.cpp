@@ -16,8 +16,8 @@ int main(){
     m.add(s);
     Deserializer d{};
 
-    int rt = d.deserialize<int>(m.getBuffer());
-    if(rt == 6){
+    std::string rt = d.deserialize<std::string>(m.getBuffer());
+    if(rt == "add"){
         std::cout << "\033[032m" << std::endl;
         std::cout << "[ SUCCESS ]" << std::endl;
         std::cout << "\033[37m" << std::endl;

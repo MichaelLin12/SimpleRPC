@@ -56,3 +56,8 @@ add_executable(test_deserialize_string tests/test_deserialize_string.cpp)
 target_compile_options(test_deserialize_string PUBLIC -O0 -fsanitize=address -g -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror)
 target_link_options(test_deserialize_string PUBLIC -fsanitize=address)
 target_link_libraries(test_deserialize_string PUBLIC Deserializer Message)
+
+add_executable(test_deserialize_uuid tests/test_deserialize_uuid.cpp)
+target_compile_options(test_deserialize_uuid PUBLIC -O0 -fsanitize=address -g -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror)
+target_link_options(test_deserialize_uuid PUBLIC -fsanitize=address)
+target_link_libraries(test_deserialize_uuid PUBLIC Deserializer Message)
