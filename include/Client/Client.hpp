@@ -62,7 +62,4 @@ private:
     Serializer serializer;
     boost::uuids::uuid id;
     int soc;
-    //logging should be GLOBAL!!!!
-    //able to enable/disable it based on the preprocessor/compiler
-    //maybe need an object for an exception 
 };
