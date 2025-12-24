@@ -28,8 +28,7 @@ std::expected<Client,ERROR> Client::create(const std::string& addr){
     hints.ai_socktype = SOCK_STREAM;
     status = getaddrinfo(addr.c_str(), "3490", &hints, &res);
     if(status != 0) [[unlikely]] {
-        fprintf(stderr, "gai error: %s\n", gai_strerror(status));
-        exit(1);
+        ret = std::unexpected(ERROR::CONN_FAILED);
     }
 
     struct addrinfo* p;
