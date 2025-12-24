@@ -29,6 +29,7 @@ void encode(Message& msg, const T data){
 
 template<typename T, std::enable_if_t<std::is_same_v<T,std::string>,int> = 0>
 void encode(Message& msg, const T data){
+    msg.add(data.size());
     msg.add(data);
 }
 

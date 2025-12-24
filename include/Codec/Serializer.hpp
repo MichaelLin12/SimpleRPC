@@ -22,9 +22,8 @@ class Serializer{
 public:
     template<typename ... Args>
     Message serialize(const boost::uuids::uuid& id, std::string& functionName, Args&&... args){
-        size_t size = sizeof(size_t) + functionName.size() + (sizeof(Args) + ...);
+        size_t size = sizeof(size_t) + functionName.size() + (sizeof(Args) + ...); // this isn't going to work if one of the args is a string or similar or non-primitive
         Message data{id, size};
-        encode<size_t>(data,functionName.size());
         encode<std::string>(data,functionName);
         (encode<std::decay_t<Args>>(data,args),...);
         return data;

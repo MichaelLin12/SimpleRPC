@@ -11,7 +11,7 @@ int main(){
     boost::uuids::random_generator gen;
     boost::uuids::uuid id = gen();
     std::string a = "hello world";
-    size_t size = a.size();
+    size_t size = a.size() + sizeof(size_t);
 
 
     Message m{id,size};
