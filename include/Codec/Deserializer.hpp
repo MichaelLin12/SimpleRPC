@@ -3,6 +3,9 @@
 #include <cstring>
 #include <concepts>
 #include <bit>
+#include <string>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 class Deserializer{
 public:
@@ -21,6 +24,24 @@ public:
             ret = std::byteswap(ret);
         }
         return ret;
+    }
+
+    template<typename Arg>
+    requires (std::same_as<Arg,std::string>)
+    Arg deserialize(const char* buffer){
+        char* ptr = buffer;
+        size_t size = deserialize<size_t>(ptr);
+        ptr += sizeof(size_t);
+        Arg rt{ptr,size};
+        return rt;
+    }
+
+    template<typename Arg>
+    requires (std::same_as<Arg,boost::uuids::uuid>)
+    Arg deserialize(const char* buffer){
+        boost::uuids::uuid id;
+        std::memcpy(id.data,buffer,boost::uuids::uuid::static_size());
+        return id;
     }
 
 };
