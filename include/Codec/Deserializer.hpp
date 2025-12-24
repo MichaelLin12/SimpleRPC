@@ -29,7 +29,7 @@ public:
     template<typename Arg>
     requires (std::same_as<Arg,std::string>)
     Arg deserialize(const char* buffer){
-        char* ptr = buffer;
+        char* ptr = const_cast<char*>(buffer);
         size_t size = deserialize<size_t>(ptr);
         ptr += sizeof(size_t);
         Arg rt{ptr,size};
