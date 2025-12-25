@@ -12,5 +12,9 @@ enum class ERROR{
     CONN_FAILED, // failed to connect
     ERR_NETWORK_RESOLVE, // getaddrinfo failed
     SEND_FAILURE, //send failure ... check errno
-    RECV_FAILURE //receive failure ... check errno
+    RECV_FAILURE, //receive failure ... check errno
+    SETSOCKOPT_FAILURE, //setsockopt failed ... check errno
+    BIND_FAILURE, // bind failed ... check errno
+    LISTEN_FAILURE, // listen failed ... check errno
+    ACCEPT_FAILURE // accept failed ... check errno
 };
