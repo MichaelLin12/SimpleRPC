@@ -2,6 +2,7 @@
 #include <string>
 #include "Codec/Serializer.hpp"
 #include "Utility/Error.hpp"
+#include "Codec/Deserializer.hpp"
 #include <expected>
 #include "Msg/Message.hpp"
 #include <boost/uuid/uuid.hpp>
@@ -20,9 +21,9 @@ public:
     template<typename Return, typename... Args>
     std::expected<Return,ERROR> call(const std::string& functionName, Args&& ... args){
         Message data = serializer.serialize<Args...>(this->id,functionName,std::forward<Args>(args)...);
-        std::expected<void,ERROR> rt = send();
+        std::expected<void,ERROR> rt = snd();
         if(rt) [[unlikely]] {
-            return std::unexpected{rt.error()};
+            return std::expected<T, ERROR>(std::unexpect, rt.error());
         }
         return receive();
     }
@@ -38,20 +39,20 @@ public:
 
     template<typename Return>
     std::expected<Return,ERROR> receive(){
-        char* buf[sizeof(Return)];
+        char buf[sizeof(Return)];
         ssize_t totalRecv = 0;
         ssize_t bytesRecv = 0;
 
         while (totalRecv < sizeof(Return)) {
             bytesRecv = recv(this->soc, buf + totalRecv, sizeof(Return) - totalRecv, 0);
             if (bytesRecv == 0) [[unlikely]] {
-                return std::expected{std::unexpect,ERROR::CONN_CLOSED};
+                return std::expected(std::unexpect,ERROR::CONN_CLOSED);
             } else if (bytesRecv == -1) [[unlikely]] {
-                return std::expected{std::unexpect, ERROR::RECV_FAILURE};
+                return std::expected(std::unexpect, ERROR::RECV_FAILURE);
             }
             totalRecv += bytesRecv;
         }
-        //deserialize return
+        Return ret = deserializer.deserialize<Return>(buf); // assume Return is like an integral or something that can be deserialized for simplicity
         return ret;
     }
 
@@ -60,6 +61,7 @@ private:
     Client();
 
     Serializer serializer;
+    Deserializer deserializer;
     boost::uuids::uuid id;
     int soc;
 };
