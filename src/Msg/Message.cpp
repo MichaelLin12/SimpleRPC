@@ -5,6 +5,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 // need to pass in client uuid and message uuid - and add size to the buffer
+// Its total size, client uuid, message uuid, function name size, function name, Args....
 Message::Message(boost::uuids::uuid clientID, std::size_t size)
         :buffer{new char[size + 2*sizeof(boost::uuids::uuid) + sizeof(size_t)]},
         id{},
@@ -15,7 +16,7 @@ Message::Message(boost::uuids::uuid clientID, std::size_t size)
     this->id = gen();
 
     
-    std::size_t v = size;
+    std::size_t v = this->size;
     if constexpr(std::endian::native == std::endian::little){
         v = std::byteswap(v);
     }

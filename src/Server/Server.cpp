@@ -1,12 +1,19 @@
 #include "Server/Server.hpp" 
 #include "Utility/Error.hpp"
+#include "Utility/Encoder.hpp"
 #include "Utility/Constants.hpp"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <expected>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <bit>
+#include <array>
+
 
 //https://johnfarrier.com/the-definitive-guide-to-std-expected-in-c/
 //https://www.cppstories.com/2024/expected-cpp23/
@@ -82,6 +89,23 @@ Server& Server::operator=(Server&& other){
     return *this;
 }
 
+void Server::receive(int socket, std::string& funcName, std::size_t sz){
+    char* buff = new char[sz+1]; // we don't send over the null character
+    std::size_t received = 0;
+    char* ptr = buff;
+    while(received < sz){
+        ssize_t bytes = recv(socket,ptr+received,sz - received,0);
+        if(bytes == 0 || bytes == -1) [[unlikely]]{ //assume this never happens
+            close(socket);
+            return;
+        }
+
+        received += static_cast<std::size_t>(bytes);
+    }
+    funcName = buff;
+    delete[] buff;
+}
+
 void Server::run(){ // assume only one socket
     struct sockaddr_storage their_addr;
     socklen_t addr_size = sizeof(their_addr);
@@ -89,14 +113,30 @@ void Server::run(){ // assume only one socket
     if(socket == -1) [[unlikely]] {
         return;
     }
-    // we need to continuously run a loop
     while(true){
-        // receive response -- handle partial reads
-        // deserialize to get the size and the function name
-        // get the function from the register
-        // bind the args
-        //execute the function
-        //send back the result 
+        std::size_t buff_size=0;
+        receive<std::size_t>(socket,buff_size);
+        if constexpr(std::endian::native == std::endian::little){
+            buff_size = std::byteswap(buff_size);
+        }
+        boost::uuids::uuid clientID;
+        receive<boost::uuids::uuid>(socket,clientID);
+        boost::uuids::uuid messageID;
+        receive<boost::uuids::uuid>(socket,messageID);
+        std::size_t funcNameSize;
+        receive<std::size_t>(socket,funcNameSize);
+        if constexpr(std::endian::native == std::endian::little){
+            funcNameSize = std::byteswap(funcNameSize);
+        }
+        std::string funcName;
+        receive(socket,funcName,funcNameSize);
+        std::function<void(char* buffer,int socket)> func = functions[funcName];
+        char* buffer = new char[buff_size - 2*sizeof(boost::uuids::uuid)-sizeof(size_t)-funcNameSize];
+        receive(socket,buffer);
+        // callProxy will send the data over
+        // this is not necessarily great design ... but it'll have to do for now
+        func(buffer,socket);
+        delete[] buffer;
     }
     close(socket);
 }
