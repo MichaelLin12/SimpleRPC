@@ -28,3 +28,22 @@ void receiveAll(int socket, std::span<std::byte> buffer, int sz){
         received+=data;
     }
 }
+
+void sendAll(int socket, std::span<std::byte> buffer){
+    std::size_t sent = 0;
+    while(sent < buffer.size()){
+        auto remainingView = buffer.subspan(sent);
+        ssize_t data = send(socket,reinterpret_cast<char*>(remainingView.data()),remainingView.size(),0);
+        if(data == -1){
+            log_error(strerror(errno));
+            std::abort();
+        }
+
+        if(data == 0){
+            log_error("Server connection closed");
+            std::abort();
+        }
+
+        sent+=data;
+    }
+}
