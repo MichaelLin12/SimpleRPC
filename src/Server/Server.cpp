@@ -79,3 +79,9 @@ void Server::run(){
     log_info(reinterpret_cast<char*>(st.data()));;
     close(new_fd);
 }
+
+Server::~Server(){
+    if(sockfd == -1)
+        return;
+    close(sockfd);
+}

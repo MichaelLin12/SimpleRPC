@@ -6,6 +6,8 @@ public:
     void create();
 
     void run();
+
+    ~Server();
 private:
     int sockfd;
 };
