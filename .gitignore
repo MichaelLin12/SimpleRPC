@@ -8,3 +8,5 @@ build
 
 #ignore vscode configurations
 .vscode
+server
+client
