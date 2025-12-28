@@ -79,7 +79,6 @@ void Server::run(){
     std::vector<std::byte> st(totalSize);
     std::span<std::byte> view = st;
     receiveAll(new_fd,st,totalSize - sizeof(std::size_t));
-    std::cout << "received size: " << totalSize << std::endl;
     //wrong way to decode name
     std::string name = decoder.decode<std::string>(view);
     std::cout << name << std::endl;
@@ -103,7 +102,6 @@ std::size_t Server::receiveSize(int socket){
     std::size_t received = 0;
     while(received < sizeof(std::size_t)){
         ssize_t bytes = recv(socket,&buf,sizeof(std::size_t),0);
-        std::cout << "FIRST RECV GOT: " << bytes << " bytes. Expected: " << sizeof(buf) << std::endl;
         if(bytes == -1){
             log_error(strerror(errno));
             std::abort();
