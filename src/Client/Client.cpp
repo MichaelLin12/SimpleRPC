@@ -14,6 +14,8 @@
 #include <array>
 #include <cstddef>
 #include <bit>
+#include <Codec/Encoder.hpp>
+#include <Msg/Message.hpp>
 
 
 void Client::create(){
@@ -59,16 +61,17 @@ void Client::create(){
 }
 
 void Client::call(){
-    std::array<std::byte, 13> arr{
-    std::byte{'H'}, std::byte{'e'}, std::byte{'l'}, std::byte{'l'}, std::byte{'o'}, 
-    std::byte{' '}, std::byte{'w'}, std::byte{'o'}, std::byte{'r'}, std::byte{'l'}, 
-    std::byte{'d'}
-    };
-    sendAll(sockfd,arr);
+    Encoder encoder{};
+    constexpr std::size_t sz = sizeof(std::size_t) + sizeof(std::size_t) + 3;
+    Message m{sz};
+    std::string funcName = "add";
+    std::vector<std::byte> arr = encoder.encode(funcName);
+    m.addData(arr);
+    sendAll(sockfd,m.getData());
 }
 
 Client::~Client(){
     if(sockfd != -1){
-        close(sockfd);
+        shutdown(sockfd,SHUT_WR);
     }
 }

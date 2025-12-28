@@ -16,6 +16,7 @@ void receiveAll(int socket, std::span<std::byte> buffer, int sz){
     while(received < sz){
         auto remainingView = buffer.subspan(received);
         ssize_t data = recv(socket,reinterpret_cast<char*>(remainingView.data()),remainingView.size(),0);
+        std::cout << "data is: " << data << std::endl;
         if(data == -1){
             log_error(strerror(errno));
             std::abort();
@@ -34,6 +35,7 @@ void sendAll(int socket, std::span<std::byte> buffer){
     while(sent < buffer.size()){
         auto remainingView = buffer.subspan(sent);
         ssize_t data = send(socket,reinterpret_cast<char*>(remainingView.data()),remainingView.size(),0);
+        std::cout << data << std::endl;
         if(data == -1){
             log_error(strerror(errno));
             std::abort();
@@ -43,7 +45,7 @@ void sendAll(int socket, std::span<std::byte> buffer){
             log_error("Server connection closed");
             std::abort();
         }
-
+        std::cout << data << std::endl;
         sent+=data;
     }
 }

@@ -11,6 +11,7 @@
 #include <bit>
 #include "Utility/Logger.hpp"
 #include "Utility/TransCeive.hpp"
+#include "Codec/Decoder.hpp"
 
 
 void Server::create(){
@@ -65,6 +66,7 @@ void Server::create(){
 }
 
 void Server::run(){
+    Decoder decoder{};
     struct sockaddr_storage their_addr;
     socklen_t sin_size = sizeof(their_addr);
     int new_fd = accept(sockfd, (struct sockaddr *)&their_addr,&sin_size);
@@ -73,10 +75,18 @@ void Server::run(){
         return;
     }
 
-    std::array<std::byte,14> st{};
-    receiveAll(new_fd,st,13);
+    std::size_t totalSize = receiveSize(new_fd);
+    std::vector<std::byte> st(totalSize);
+    std::span<std::byte> view = st;
+    receiveAll(new_fd,st,totalSize - sizeof(std::size_t));
+    std::cout << "received size: " << totalSize << std::endl;
+    //wrong way to decode name
+    std::string name = decoder.decode<std::string>(view);
+    std::cout << name << std::endl;
+    auto func = functions[name];
+    func(new_fd,view);
     
-    log_info(reinterpret_cast<char*>(st.data()));;
+    //log_info(reinterpret_cast<char*>(st.data()));;
     close(new_fd);
 }
 
@@ -84,4 +94,26 @@ Server::~Server(){
     if(sockfd == -1)
         return;
     close(sockfd);
+}
+
+Server::Server():sockfd{-1},functions{}{}
+
+std::size_t Server::receiveSize(int socket){
+    std::size_t buf = 0;
+    std::size_t received = 0;
+    while(received < sizeof(std::size_t)){
+        ssize_t bytes = recv(socket,&buf,sizeof(std::size_t),0);
+        std::cout << "FIRST RECV GOT: " << bytes << " bytes. Expected: " << sizeof(buf) << std::endl;
+        if(bytes == -1){
+            log_error(strerror(errno));
+            std::abort();
+        }
+        if(bytes == 0){
+            log_error("client closed connection");
+            std::abort();
+        }
+        received += bytes;
+    }
+
+    return buf;
 }
