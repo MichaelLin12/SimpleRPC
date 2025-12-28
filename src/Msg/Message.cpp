@@ -14,9 +14,10 @@ std::span<std::byte> Message::getData(){
     return std::span<std::byte>{buffer.data(),offset};
 }
 
+/*
 void Message::addData(const std::span<std::byte> arr){
     if(offset + arr.size() <= sz){
         std::memcpy(buffer.data() + offset, arr.data(), arr.size());
         offset += arr.size();
     }
-}
+}*/
