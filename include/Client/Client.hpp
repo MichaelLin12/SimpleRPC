@@ -19,6 +19,7 @@ public:
         Decoder decoder{};
         std::size_t size = sizeof(size_t) + getSize(funcName) + (getSize<std::remove_cvref_t<Args>>(args) + ...);
         Message m{size};
+        encoder.encode(size,m);
         encoder.encode(funcName,m);
         (encoder.encode<std::remove_cvref_t<Args>>(args,m),...);
         sendAll(sockfd,m.getBuffer());

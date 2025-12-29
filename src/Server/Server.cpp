@@ -77,16 +77,20 @@ void Server::run(){
     }
 
     size_t sz = receiveSize(new_fd);
+    sz = std::byteswap(sz);
+    std::cout << "size has been received ... need to create message: " << sz << std::endl;
     Message m{sz};
-    //std::cout << "received size: " << sz << std::endl;
-    //std::cout << "buffer size is: " << m.getBuffer().size() << std::endl;
-    //std::cout << "real buffer size: " << m.getSize() << std::endl;
-    //std::cout << "offset is: " << m.getOffset() << std::endl;
+    std::cout << "created message" << std::endl;
+    m.addData(sz);
+    std::cout << "received size: " << sz << std::endl;
+    std::cout << "buffer size is: " << m.getBuffer().size() << std::endl;
+    std::cout << "real buffer size: " << m.getSize() << std::endl;
+    std::cout << "offset is: " << m.getOffset() << std::endl;
     receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
     //wrong way to decode name
     std::string name = decoder.decode<std::string>(m);
-    //std::span<std::byte> argBytes = m.getData();
-    //std::cout << "argBytes size: " << argBytes.size() << std::endl;
+    std::span<std::byte> argBytes = m.getData();
+    std::cout << "argBytes size: " << argBytes.size() << std::endl;
     auto func = functions[name];
     func(new_fd,m);
     close(new_fd);

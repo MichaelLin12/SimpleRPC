@@ -7,10 +7,7 @@
 #include <iostream>
 
 //size must include sz as well even if not explicit
-Message::Message(std::size_t size):buffer(size),offset{0},sz{size}{
-    std::memcpy(buffer.data(),&sz,sizeof(sz));
-    offset += sizeof(size);
-}
+Message::Message(std::size_t size):buffer(size),offset{0},sz{size}{}
 
 std::span<std::byte> Message::getData(){
     return std::span{buffer.data() + offset,sz - offset};
