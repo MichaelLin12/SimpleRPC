@@ -3,8 +3,7 @@
 #include <string>
 
 int add(int x, int y){
-    std::cout << x+y << std::endl;
-    return 5;
+    return x+y;
 }
 
 int main(){
