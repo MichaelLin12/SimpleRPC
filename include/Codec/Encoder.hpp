@@ -25,6 +25,9 @@ public:
     requires (std::integral<T>)
     void encode(T arg, Message& msg){
         // need to deal with big endian and little endian
+        if constexpr(std::endian::native == std::endian::little && sizeof(arg) > 1){
+            arg = std::byteswap(arg);
+        }
         msg.addData(arg);
     }
 };

@@ -37,6 +37,9 @@ public:
         T value;
         std::memcpy(&value, buffer.data(), sizeof(T));
         m.setOffset(m.getOffset() + sizeof(T));
+        if constexpr(std::endian::native == std::endian::little){
+            value = std::byteswap(value);
+        }
         return value;
     }
 };
