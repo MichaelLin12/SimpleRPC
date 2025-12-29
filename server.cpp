@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
-int add(int x){
-    std::cout << x << std::endl;
+int add(int x, int y){
+    std::cout << x+y << std::endl;
     return 5;
 }
 

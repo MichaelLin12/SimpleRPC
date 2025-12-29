@@ -62,13 +62,15 @@ void Client::create(){
 
 void Client::call(){
     Encoder encoder{};
-    constexpr std::size_t sz = sizeof(std::size_t) + sizeof(std::size_t) + 3 + sizeof(int);
+    constexpr std::size_t sz = sizeof(std::size_t) + sizeof(std::size_t) + 3 + sizeof(int) + sizeof(int);
     std::cout << sz << std::endl;
     Message m{sz};
     std::string funcName = "add";
     int x = 5;
+    int y = 3;
     encoder.encode(funcName,m);
     encoder.encode(x,m);
+    encoder.encode(y,m);
     sendAll(sockfd,m.getBuffer());
 }
 
