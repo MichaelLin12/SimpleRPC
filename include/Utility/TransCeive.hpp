@@ -11,7 +11,7 @@
 #include "Utility/Logger.hpp"
 #include <cstddef>
 
-void receiveAll(int socket, std::span<std::byte> buffer, int sz){
+inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
     std::size_t received = 0;
     while(received < sz){
         auto remainingView = buffer.subspan(received);
@@ -29,7 +29,7 @@ void receiveAll(int socket, std::span<std::byte> buffer, int sz){
     }
 }
 
-void sendAll(int socket, std::span<std::byte> buffer){
+inline void sendAll(int socket, std::span<std::byte> buffer){
     std::cout << "buffer size is: " << buffer.size() << std::endl;
     std::size_t sent = 0;
     while(sent < buffer.size()){

@@ -60,6 +60,7 @@ void Client::create(){
     freeaddrinfo(servinfo);
 }
 
+/*
 void Client::call(){
     Encoder encoder{};
     constexpr std::size_t sz = sizeof(std::size_t) + sizeof(std::size_t) + 3 + sizeof(int) + sizeof(int);
@@ -73,6 +74,7 @@ void Client::call(){
     encoder.encode(y,m);
     sendAll(sockfd,m.getBuffer());
 }
+*/
 
 Client::~Client(){
     if(sockfd != -1){
