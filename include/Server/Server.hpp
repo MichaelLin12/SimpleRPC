@@ -1,6 +1,5 @@
 #pragma once
 #include <map>
-#include <string>
 #include <functional>
 #include <span>
 #include <bit>
@@ -9,6 +8,7 @@
 #include "Codec/Decoder.hpp"
 #include <iostream>
 #include <string>
+#include "Msg/Message.hpp"
 
 class Server{
 public:
@@ -20,10 +20,10 @@ public:
 
     template<typename Ret, typename... Args>
     void registerFunction(std::string key, Ret(*func)(Args... args)){
-        functions[key] = [func](const int socket, std::span<std::byte> buffer)->void{
+        functions[key] = [func](int socket, Message& m)->void{
             Ret rt{};
             Decoder decoder{};
-            std::tuple arguments = std::make_tuple<std::decay_t<Args>...>(decoder.decode<std::decay_t<Args>>(buffer)...);
+            std::tuple arguments = std::make_tuple<std::decay_t<Args>...>(decoder.decode<std::decay_t<Args>>(m)...);
             rt = std::apply(func,arguments);
             std::cout << rt << std::endl; //assume it can be printed
             // still need to resend the rt back
@@ -31,5 +31,5 @@ public:
     }
 private:
     int sockfd;
-    std::map<std::string, std::function<void(int,std::span<std::byte>)>> functions;
+    std::map<std::string, std::function<void(int,Message&)>> functions;
 };

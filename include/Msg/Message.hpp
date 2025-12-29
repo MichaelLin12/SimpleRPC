@@ -24,7 +24,12 @@ public:
     }
 
     std::span<std::byte> getData();
+    std::span<std::byte> getBuffer();
     Message(std::size_t size);
+    std::size_t getSize();
+    std::size_t getOffset();
+    void setOffset(std::size_t noffset);
+    
 
     ~Message()=default;
 private:

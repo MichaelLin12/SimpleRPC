@@ -12,6 +12,7 @@
 #include "Utility/Logger.hpp"
 #include "Utility/TransCeive.hpp"
 #include "Codec/Decoder.hpp"
+#include "Msg/Message.hpp"
 
 
 void Server::create(){
@@ -75,17 +76,19 @@ void Server::run(){
         return;
     }
 
-    std::size_t totalSize = receiveSize(new_fd);
-    std::vector<std::byte> st(totalSize);
-    std::span<std::byte> view = st;
-    receiveAll(new_fd,st,totalSize - sizeof(std::size_t));
+    size_t sz = receiveSize(new_fd);
+    Message m{sz};
+    //std::cout << "received size: " << sz << std::endl;
+    //std::cout << "buffer size is: " << m.getBuffer().size() << std::endl;
+    //std::cout << "real buffer size: " << m.getSize() << std::endl;
+    //std::cout << "offset is: " << m.getOffset() << std::endl;
+    receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
     //wrong way to decode name
-    std::string name = decoder.decode<std::string>(view);
-    std::cout << name << std::endl;
+    std::string name = decoder.decode<std::string>(m);
+    //std::span<std::byte> argBytes = m.getData();
+    //std::cout << "argBytes size: " << argBytes.size() << std::endl;
     auto func = functions[name];
-    func(new_fd,view);
-    
-    //log_info(reinterpret_cast<char*>(st.data()));;
+    func(new_fd,m);
     close(new_fd);
 }
 
@@ -98,6 +101,7 @@ Server::~Server(){
 Server::Server():sockfd{-1},functions{}{}
 
 std::size_t Server::receiveSize(int socket){
+    std::cout << "Server::receiveSize" << std::endl;
     std::size_t buf = 0;
     std::size_t received = 0;
     while(received < sizeof(std::size_t)){

@@ -4,20 +4,30 @@
 #include <span>
 #include <vector>
 #include <cstring>
+#include <iostream>
 
+//size must include sz as well even if not explicit
 Message::Message(std::size_t size):buffer(size),offset{0},sz{size}{
     std::memcpy(buffer.data(),&sz,sizeof(sz));
-    offset += sizeof(sz);
+    offset += sizeof(size);
 }
 
 std::span<std::byte> Message::getData(){
-    return std::span<std::byte>{buffer.data(),offset};
+    return std::span{buffer.data() + offset,sz - offset};
 }
 
-/*
-void Message::addData(const std::span<std::byte> arr){
-    if(offset + arr.size() <= sz){
-        std::memcpy(buffer.data() + offset, arr.data(), arr.size());
-        offset += arr.size();
-    }
-}*/
+std::span<std::byte> Message::getBuffer(){
+    return buffer;
+}
+
+std::size_t Message::getSize(){
+    return sz;
+}
+
+std::size_t Message::getOffset(){
+    return offset;
+}
+
+void Message::setOffset(std::size_t noffset){
+    offset = noffset;
+}

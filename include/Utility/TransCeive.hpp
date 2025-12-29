@@ -30,6 +30,7 @@ void receiveAll(int socket, std::span<std::byte> buffer, int sz){
 }
 
 void sendAll(int socket, std::span<std::byte> buffer){
+    std::cout << "buffer size is: " << buffer.size() << std::endl;
     std::size_t sent = 0;
     while(sent < buffer.size()){
         auto remainingView = buffer.subspan(sent);
@@ -45,4 +46,5 @@ void sendAll(int socket, std::span<std::byte> buffer){
         }
         sent+=data;
     }
+    std::cout << "sent: " << sent << std::endl;
 }

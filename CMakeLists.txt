@@ -16,6 +16,7 @@ target_link_libraries(Client PUBLIC Message)
 
 add_library(Server src/Server/Server.cpp)
 target_include_directories(Server PUBLIC include)
+target_link_libraries(Server PUBLIC Message)
 
 add_executable(client client.cpp)
 target_include_directories(client PUBLIC include)
