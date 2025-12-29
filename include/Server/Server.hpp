@@ -30,8 +30,7 @@ public:
             rt = std::apply(func,arguments);
             std::cout << "return value is: " << rt << std::endl; //assume it can be printed
             // still need to resend the rt back
-            Message retM{sizeof(Ret) + sizeof(std::size_t)};
-            encoder.encode(sizeof(std::size_t),retM);
+            Message retM{sizeof(Ret)};
             encoder.encode(rt,retM);
             sendAll(socket,retM.getBuffer());
         };

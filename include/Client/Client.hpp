@@ -23,11 +23,10 @@ public:
         encoder.encode(funcName,m);
         (encoder.encode<std::remove_cvref_t<Args>>(args,m),...);
         sendAll(sockfd,m.getBuffer());
-        Message rec{sizeof(R)+sizeof(std::size_t)};
+        Message rec{sizeof(R)};
         std::cout << "rec size: " << rec.getSize() << std::endl;
         std::cout << "rec offset: " << rec.getOffset() << std::endl;
         receiveAll(sockfd,rec.getBuffer(),rec.getSize());
-        rec.setOffset(sizeof(std::size_t));
         R rt = decoder.decode<R>(rec);
         std::cout << rt << std::endl;
     }
