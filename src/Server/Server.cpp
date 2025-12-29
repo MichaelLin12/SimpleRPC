@@ -13,6 +13,7 @@
 #include "Utility/TransCeive.hpp"
 #include "Codec/Decoder.hpp"
 #include "Msg/Message.hpp"
+#include <format>
 
 
 void Server::create(){
@@ -77,19 +78,18 @@ void Server::run(){
     }
 
     size_t sz = receiveSize(new_fd);
-    //std::cout << "size has been received ... need to create message: " << sz << std::endl;
+    log_debug(std::format("size has been received... need to create message: {}", sz));
     Message m{sz};
-    //std::cout << "created message" << std::endl;
+    log_debug("created message");
     m.addData(sz);
-    //std::cout << "received size: " << sz << std::endl;
-    //std::cout << "buffer size is: " << m.getBuffer().size() << std::endl;
-    //std::cout << "real buffer size: " << m.getSize() << std::endl;
-    //std::cout << "offset is: " << m.getOffset() << std::endl;
+    log_debug(std::format("received size: ",sz));
+    log_debug(std::format("buffer size is: {}",m.getBuffer().size()));
+    log_debug(std::format("real buffer size: {}",m.getSize()));
+    log_debug(std::format("offset is: {}",m.getOffset()));
     receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
-    //wrong way to decode name
     std::string name = decoder.decode<std::string>(m);
     std::span<std::byte> argBytes = m.getData();
-    //std::cout << "argBytes size: " << argBytes.size() << std::endl;
+    log_debug(std::format("argBytes size: {}",argBytes.size()));
     auto func = functions[name];
     func(new_fd,m);
     close(new_fd);
@@ -104,7 +104,7 @@ Server::~Server(){
 Server::Server():sockfd{-1},functions{}{}
 
 std::size_t Server::receiveSize(int socket){
-    std::cout << "Server::receiveSize" << std::endl;
+    log_debug("Server::receiveSize");
     std::size_t buf = 0;
     std::size_t received = 0;
     while(received < sizeof(std::size_t)){

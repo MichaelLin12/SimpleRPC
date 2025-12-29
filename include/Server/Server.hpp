@@ -11,6 +11,7 @@
 #include <string>
 #include "Msg/Message.hpp"
 #include "Utility/TransCeive.hpp"
+#include "Utility/Logger.hpp"
 
 class Server{
 public:
@@ -28,8 +29,7 @@ public:
             Encoder encoder{};
             std::tuple arguments = std::make_tuple<std::decay_t<Args>...>(decoder.decode<std::decay_t<Args>>(m)...);
             rt = std::apply(func,arguments);
-            std::cout << "return value is: " << rt << std::endl; //assume it can be printed
-            // still need to resend the rt back
+            log_debug(std::format("return value is: {}",rt));
             Message retM{sizeof(Ret)};
             encoder.encode(rt,retM);
             sendAll(socket,retM.getBuffer());

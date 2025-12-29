@@ -7,8 +7,9 @@
 #include <cstring>
 #include <bit>
 #include <concepts>
-#include <iostream>
+#include "Utility/Logger.hpp"
 #include "Msg/Message.hpp"
+#include <format>
 
 class Decoder{
 public:
@@ -20,8 +21,8 @@ public:
     T decode(Message& m){
         std::size_t size = decode<size_t>(m);
         auto buffer = m.getData();
-        std::cout << "size is: " << size << std::endl;
-        std::cout << "buffer size is: " << buffer.size() << std::endl;
+        log_debug(std::format("size is: {}",size));
+        log_debug(std::format("buffer size is: {}", buffer.size()));
         std::string rt = std::string{reinterpret_cast<const char*>(buffer.data()), size};
         m.setOffset(m.getOffset() + size);
         return rt;
@@ -32,16 +33,16 @@ public:
     T decode(Message& m){
         // need to convert from big endian to little endian
         auto buffer = m.getData();
-        std::cout << "buffer size is: " << buffer.size() << std::endl;
-        std::cout << "argument size is: " << sizeof(T) << std::endl;
+        log_debug(std::format("buffer size is: {}", buffer.size()));
+        log_debug(std::format("argument size is: {}", sizeof(T)));
         T value;
         std::memcpy(&value, buffer.data(), sizeof(T));
-        std::cout << "value is: " << value << std::endl;
+        log_debug(std::format("value is: {}", value));
         m.setOffset(m.getOffset() + sizeof(T));
         if constexpr(std::endian::native == std::endian::little){
             value = std::byteswap(value);
         }
-        std::cout << "value is:(potentially after byteswap) " << value << std::endl;
+        log_debug(std::format("value is:(potentially after byteswap) {}",value));
         return value;
     }
 };

@@ -10,11 +10,10 @@
 #include <bit>
 #include "Utility/Logger.hpp"
 #include <cstddef>
-#include <iostream>
 
 inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
-    std::cout << "buffer size is: " << buffer.size() << std::endl;
-    std::cout << "sz is: " << sz << std::endl;
+    log_debug(std::format("buffer size is: {}",buffer.size()));
+    log_debug(std::format("sz is: {}",sz));
     std::size_t received = 0;
     while(received < sz){
         auto remainingView = buffer.subspan(received);
@@ -33,7 +32,7 @@ inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
 }
 
 inline void sendAll(int socket, std::span<std::byte> buffer){
-    std::cout << "buffer size is: " << buffer.size() << std::endl;
+    log_debug(std::format("buffer size is: ", buffer.size()));
     std::size_t sent = 0;
     while(sent < buffer.size()){
         auto remainingView = buffer.subspan(sent);
@@ -49,5 +48,5 @@ inline void sendAll(int socket, std::span<std::byte> buffer){
         }
         sent+=data;
     }
-    std::cout << "sent: " << sent << std::endl;
+    log_debug(std::format("sent: {}",sent));
 }
