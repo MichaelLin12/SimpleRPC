@@ -10,8 +10,11 @@
 #include <bit>
 #include "Utility/Logger.hpp"
 #include <cstddef>
+#include <iostream>
 
 inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
+    std::cout << "buffer size is: " << buffer.size() << std::endl;
+    std::cout << "sz is: " << sz << std::endl;
     std::size_t received = 0;
     while(received < sz){
         auto remainingView = buffer.subspan(received);

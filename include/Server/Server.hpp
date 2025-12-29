@@ -6,9 +6,11 @@
 #include <span>
 #include <tuple>
 #include "Codec/Decoder.hpp"
+#include "Codec/Encoder.hpp"
 #include <iostream>
 #include <string>
 #include "Msg/Message.hpp"
+#include "Utility/TransCeive.hpp"
 
 class Server{
 public:
@@ -23,10 +25,14 @@ public:
         functions[key] = [func](int socket, Message& m)->void{
             Ret rt{};
             Decoder decoder{};
+            Encoder encoder{};
             std::tuple arguments = std::make_tuple<std::decay_t<Args>...>(decoder.decode<std::decay_t<Args>>(m)...);
             rt = std::apply(func,arguments);
-            std::cout << rt << std::endl; //assume it can be printed
+            std::cout << "return value is: " << rt << std::endl; //assume it can be printed
             // still need to resend the rt back
+            Message retM{sizeof(Ret) + sizeof(std::size_t)}; // need a better way to detemine size
+            encoder.encode(rt,retM);
+            sendAll(socket,retM.getBuffer());
         };
     }
 private:

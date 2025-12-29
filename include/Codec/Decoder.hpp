@@ -36,10 +36,12 @@ public:
         std::cout << "argument size is: " << sizeof(T) << std::endl;
         T value;
         std::memcpy(&value, buffer.data(), sizeof(T));
+        std::cout << "value is: " << value << std::endl;
         m.setOffset(m.getOffset() + sizeof(T));
         if constexpr(std::endian::native == std::endian::little){
             value = std::byteswap(value);
         }
+        std::cout << "value is:(potentially after byteswap) " << value << std::endl;
         return value;
     }
 };
