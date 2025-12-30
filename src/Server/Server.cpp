@@ -126,17 +126,23 @@ Server::~Server(){
 Server::Server():sockfd{-1},functions{}{}
 
 std::size_t Server::receiveSize(int socket){
+#ifdef LOGGING
     log_debug("Server::receiveSize");
+#endif
     std::size_t buf = 0;
     std::size_t received = 0;
     while(received < sizeof(std::size_t)){
         ssize_t bytes = recv(socket,&buf,sizeof(std::size_t),0);
         if(bytes == -1){
+#ifdef LOGGING
             log_error(strerror(errno));
+#endif
             std::abort();
         }
         if(bytes == 0){
+#ifdef LOGGING
             log_error("client closed connection");
+#endif
             std::abort();
         }
         received += bytes;
