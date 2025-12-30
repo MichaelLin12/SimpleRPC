@@ -29,7 +29,9 @@ public:
             Encoder encoder{};
             std::tuple arguments = std::make_tuple<std::decay_t<Args>...>(decoder.decode<std::decay_t<Args>>(m)...);
             rt = std::apply(func,arguments);
+#ifdef LOGGING
             log_debug(std::format("return value is: {}",rt));
+#endif
             Message retM{sizeof(Ret)};
             encoder.encode(rt,retM);
             sendAll(socket,retM.getBuffer());

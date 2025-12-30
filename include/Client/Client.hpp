@@ -24,8 +24,10 @@ public:
         (encoder.encode<std::remove_cvref_t<Args>>(args,m),...);
         sendAll(sockfd,m.getBuffer());
         Message rec{sizeof(R)};
+#ifdef LOGGING
         log_debug(std::format("rec size: {}", rec.getSize()));
         log_debug(std::format("rec offset: {}",rec.getOffset()));
+#endif
         receiveAll(sockfd,rec.getBuffer(),rec.getSize());
         R rt = decoder.decode<R>(rec);
         return rt;

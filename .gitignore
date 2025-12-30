@@ -1,5 +1,6 @@
 #ignore all build directories
 build
+build_logging
 
 # ignore all binaries and object files
 *.o

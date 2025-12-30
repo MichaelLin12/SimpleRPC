@@ -21,8 +21,10 @@ public:
     T decode(Message& m){
         std::size_t size = decode<size_t>(m);
         auto buffer = m.getData();
+#ifdef LOGGING
         log_debug(std::format("size is: {}",size));
         log_debug(std::format("buffer size is: {}", buffer.size()));
+#endif
         std::string rt = std::string{reinterpret_cast<const char*>(buffer.data()), size};
         m.setOffset(m.getOffset() + size);
         return rt;
@@ -31,18 +33,23 @@ public:
     template<typename T>
     requires (std::integral<T>)
     T decode(Message& m){
-        // need to convert from big endian to little endian
         auto buffer = m.getData();
+#ifdef LOGGING
         log_debug(std::format("buffer size is: {}", buffer.size()));
         log_debug(std::format("argument size is: {}", sizeof(T)));
+#endif
         T value;
         std::memcpy(&value, buffer.data(), sizeof(T));
+#ifdef LOGGING
         log_debug(std::format("value is: {}", value));
+#endif
         m.setOffset(m.getOffset() + sizeof(T));
         if constexpr(std::endian::native == std::endian::little){
             value = std::byteswap(value);
         }
+#ifdef LOGGING
         log_debug(std::format("value is:(potentially after byteswap) {}",value));
+#endif
         return value;
     }
 };
