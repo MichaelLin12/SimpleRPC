@@ -98,7 +98,9 @@ void Server::run(){
     log_debug(std::format("size has been received... need to create message: {}", sz));
 #endif
     Message m{sz};
+#ifdef LOGGING
     log_debug("created message");
+#endif
     m.addData(sz);
 #ifdef LOGGING
     log_debug(std::format("received size: ",sz));
