@@ -14,7 +14,7 @@ public:
     void create();
 
     template<typename R,typename... Args>
-    R call(std::string& funcName,Args&&... args){
+    R call(const std::string& funcName,Args&&... args){
         Encoder encoder{};
         Decoder decoder{};
         std::size_t size = sizeof(size_t) + getSize(funcName) + (getSize<std::remove_cvref_t<Args>>(args) + ...);
