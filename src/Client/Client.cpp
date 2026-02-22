@@ -30,29 +30,19 @@ void Client::create(){
     hints.ai_socktype = SOCK_STREAM;
 
     if ((rv = getaddrinfo("localhost", PORT, &hints, &servinfo)) != 0) {
-#ifdef LOGGING
-        log_error(gai_strerror(rv));
-#endif
+        LOGGING(LogLevel::ERROR,"{}",gai_strerror(rv));
         return;
     }
 
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-#ifdef LOGGING
-            log_error(strerror(errno));
-#endif
+            LOGGING(LogLevel::ERROR, "{}", strerror(errno));
             continue;
         }
-
-#ifdef LOGGING
-        log_info("client: attempting to connect");
-#endif
-
+        LOGGING(LogLevel::INFO, "client: attempting to connect");
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-#ifdef LOGGING
-            log_error(strerror(errno));
-#endif
+            LOGGING(LogLevel::ERROR, "{}", strerror(errno));
             close(sockfd);
             continue;
         }
@@ -61,9 +51,7 @@ void Client::create(){
     }
 
     if (p == NULL) {
-#ifdef LOGGING
-        log_error("Client failed to connect");
-#endif
+        LOGGING(LogLevel::ERROR,"Client failed to connect");
         return;
     }
 

@@ -13,7 +13,6 @@
 #include "Utility/TransCeive.hpp"
 #include "Codec/Decoder.hpp"
 #include "Msg/Message.hpp"
-#include <format>
 
 
 void Server::create(){
@@ -94,9 +93,11 @@ std::size_t Server::receiveSize(int socket){
     while(received < sizeof(std::size_t)){
         ssize_t bytes = recv(socket,&buf,sizeof(std::size_t),0);
         if(bytes == -1){
+            LOGGING(LogLevel::INFO, "somthing wrong happened");
             std::abort();
         }
-        if(bytes == 0){
+        if(bytes == 0){ // client side has closed
+            LOGGING(LogLevel::INFO,"received 0 bytes");
             std::abort();
         }
         received += bytes;

@@ -2,7 +2,6 @@
 #include <map>
 #include <functional>
 #include <tuple>
-#include <iostream>
 #include <string>
 #include "Codec/Decoder.hpp"
 #include "Codec/Encoder.hpp"

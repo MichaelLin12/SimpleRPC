@@ -12,25 +12,19 @@
 #include <cstddef>
 
 inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
-#ifdef LOGGING
-    log_debug(std::format("buffer size is: {}",buffer.size()));
-    log_debug(std::format("sz is: {}",sz));
-#endif
+    LOGGING(LogLevel::DEBUG, "buffer size is: {}", buffer.size());
+    LOGGING(LogLevel::DEBUG, "sz is: {}",sz);
     std::size_t received = 0;
     while(received < sz){
         auto remainingView = buffer.subspan(received);
         ssize_t data = recv(socket,reinterpret_cast<char*>(remainingView.data()),remainingView.size(),0);
         if(data == -1){
-#ifdef LOGGING
-            log_error(strerror(errno));
-#endif
+            LOGGING(LogLevel::ERROR, "{}",strerror(errno));
             std::abort();
         }
 
         if(data == 0){
-#ifdef LOGGING
-            log_error("Client connection closed");
-#endif
+            LOGGING(LogLevel::ERROR, "Client connection closed");
             std::abort();
         }
         received+=data;
@@ -38,29 +32,21 @@ inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
 }
 
 inline void sendAll(int socket, std::span<std::byte> buffer){
-#ifdef LOGGING
-    log_debug(std::format("buffer size is: ", buffer.size()));
-#endif
+    LOGGING(LogLevel::DEBUG, "buffer size is: ", buffer.size());
     std::size_t sent = 0;
     while(sent < buffer.size()){
         auto remainingView = buffer.subspan(sent);
         ssize_t data = send(socket,reinterpret_cast<char*>(remainingView.data()),remainingView.size(),0);
         if(data == -1){
-#ifdef LOGGING
-            log_error(strerror(errno));
-#endif
+            LOGGING(LogLevel::ERROR, "{}", strerror(errno));
             std::abort();
         }
 
         if(data == 0){
-#ifdef LOGGING
-            log_error("Server connection closed");
-#endif
+            LOGGING(LogLevel::ERROR, "{}",strerror(errno));
             std::abort();
         }
         sent+=data;
     }
-#ifdef LOGGING
-    log_debug(std::format("sent: {}",sent));
-#endif
+    LOGGING(LogLevel::DEBUG, "sent: {}", sent);
 }
