@@ -26,7 +26,8 @@ void Server::create(){
     hints.ai_flags = AI_PASSIVE; // use my IP
 
     if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
-        std::abort();
+        LOGGING(LogLevel::ERROR,"gai error: {}", gai_strerror(rv));
+        std::abort(); // error
     }
 
     // loop through all the results and bind to the first we can
@@ -68,13 +69,18 @@ void Server::run(){
     }
     while(true){
         size_t sz = receiveSize(new_fd);
+        if(sz == 0){
+            break;
+        }
         Message m{sz};
         m.addData(sz);
-        receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
+        std::size_t received = receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
+        if(!received)
+            break;
         std::string name = decoder.decode<std::string>(m);
         std::span<std::byte> argBytes = m.getData();
         auto handler = functions[name]; // assume always true for now
-        handler.call(handler.functionPointer,new_fd,m);
+        handler.call(handler.functionPointer,new_fd,m); // assume works as intended for now
     }
     close(new_fd);
 }
@@ -97,8 +103,9 @@ std::size_t Server::receiveSize(int socket){
             std::abort();
         }
         if(bytes == 0){ // client side has closed
-            LOGGING(LogLevel::INFO,"received 0 bytes");
-            std::abort();
+            LOGGING(LogLevel::INFO,"received 0 bytes ... you should close the socket");
+            break;
+            //std::abort();
         }
         received += bytes;
     }

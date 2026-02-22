@@ -11,7 +11,7 @@
 #include "Utility/Logger.hpp"
 #include <cstddef>
 
-inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
+inline std::size_t receiveAll(int socket, std::span<std::byte> buffer, int sz){
     LOGGING(LogLevel::DEBUG, "buffer size is: {}", buffer.size());
     LOGGING(LogLevel::DEBUG, "sz is: {}",sz);
     std::size_t received = 0;
@@ -25,10 +25,13 @@ inline void receiveAll(int socket, std::span<std::byte> buffer, int sz){
 
         if(data == 0){
             LOGGING(LogLevel::ERROR, "Client connection closed");
-            std::abort();
+            return 0;
+            //std::abort();
         }
         received+=data;
     }
+
+    return received;
 }
 
 inline void sendAll(int socket, std::span<std::byte> buffer){

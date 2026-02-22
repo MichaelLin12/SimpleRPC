@@ -25,7 +25,7 @@ void dispatcher(void* fptr, int socket, Message& m) {
 
     Message retM{sizeof(Ret)};
     encoder.encode(rt, retM);
-    sendAll(socket, retM.getBuffer());
+    sendAll(socket, retM.getBuffer()); // could be the case that it doesn't send all
 }
 
 class Server{
