@@ -92,30 +92,31 @@ void Server::run(){
 #endif
         return;
     }
-
-    size_t sz = receiveSize(new_fd);
+    while(true){
+        size_t sz = receiveSize(new_fd);
 #ifdef LOGGING
-    log_debug(std::format("size has been received... need to create message: {}", sz));
+        log_debug(std::format("size has been received... need to create message: {}", sz));
 #endif
-    Message m{sz};
+        Message m{sz};
 #ifdef LOGGING
-    log_debug("created message");
+        log_debug("created message");
 #endif
-    m.addData(sz);
+        m.addData(sz);
 #ifdef LOGGING
-    log_debug(std::format("received size: ",sz));
-    log_debug(std::format("buffer size is: {}",m.getBuffer().size()));
-    log_debug(std::format("real buffer size: {}",m.getSize()));
-    log_debug(std::format("offset is: {}",m.getOffset()));
+        log_debug(std::format("received size: ",sz));
+        log_debug(std::format("buffer size is: {}",m.getBuffer().size()));
+        log_debug(std::format("real buffer size: {}",m.getSize()));
+        log_debug(std::format("offset is: {}",m.getOffset()));
 #endif
-    receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
-    std::string name = decoder.decode<std::string>(m);
-    std::span<std::byte> argBytes = m.getData();
+        receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
+        std::string name = decoder.decode<std::string>(m);
+        std::span<std::byte> argBytes = m.getData();
 #ifdef LOGGING
-    log_debug(std::format("argBytes size: {}",argBytes.size()));
+        log_debug(std::format("argBytes size: {}",argBytes.size()));
 #endif
-    auto func = functions[name];
-    func(new_fd,m);
+        auto func = functions[name];
+        func(new_fd,m);
+    }
     close(new_fd);
 }
 
