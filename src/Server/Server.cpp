@@ -9,6 +9,7 @@
 #include "Utility/Constants.hpp"
 #include <array>
 #include <bit>
+#include <future>
 #include "Utility/Logger.hpp"
 #include "Utility/TransCeive.hpp"
 #include "Codec/Decoder.hpp"
@@ -60,29 +61,34 @@ void Server::create(){
 }
 
 void Server::run(){
-    Decoder decoder{};
     struct sockaddr_storage their_addr;
     socklen_t sin_size = sizeof(their_addr);
-    int new_fd = accept(sockfd, (struct sockaddr *)&their_addr,&sin_size);
-    if (new_fd == -1) {
-        return;
-    }
-    while(true){
-        size_t sz = receiveSize(new_fd);
-        if(sz == 0){
-            break;
+    auto fn = [this](int new_fd){
+        Decoder decoder{};
+        while(true){
+            size_t sz = receiveSize(new_fd);
+            if(sz == 0){
+                break;
+            }
+            Message m{sz};
+            m.addData(sz);
+            std::size_t received = receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
+            if(!received)
+                break;
+            std::string name = decoder.decode<std::string>(m);
+            std::span<std::byte> argBytes = m.getData();
+            auto handler = functions[name]; // assume always true for now
+            handler.call(handler.functionPointer,new_fd,m); // assume works as intended for now
         }
-        Message m{sz};
-        m.addData(sz);
-        std::size_t received = receiveAll(new_fd,m.getData(),m.getSize() - m.getOffset());
-        if(!received)
-            break;
-        std::string name = decoder.decode<std::string>(m);
-        std::span<std::byte> argBytes = m.getData();
-        auto handler = functions[name]; // assume always true for now
-        handler.call(handler.functionPointer,new_fd,m); // assume works as intended for now
+        close(new_fd);
+    };
+    while(true){
+        int new_fd = accept(sockfd, (struct sockaddr *)&their_addr,&sin_size);
+        if (new_fd == -1) {
+            return;
+        }
+        std::future<void> fut = std::async(fn,new_fd);
     }
-    close(new_fd);
 }
 
 Server::~Server(){
