@@ -11,3 +11,4 @@ build_logging
 .vscode
 server
 client
+llvm*
