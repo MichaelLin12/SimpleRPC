@@ -17,11 +17,16 @@ public:
     }
 
     template<typename T>
-    requires (std::integral<T>)
+    requires (std::integral<T> || std::same_as<T, bool> || std::same_as<T, char>)
     void addData(const T& arg){
         std::memcpy(buffer.data()+offset, &arg, sizeof(T));
         offset+=sizeof(T);
     }
+
+    //template<typename T>
+    //requires requires(T a){
+    //    a.a
+    //}
 
     std::span<std::byte> getData();
     std::span<std::byte> getBuffer();

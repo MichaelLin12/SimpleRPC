@@ -32,7 +32,7 @@ public:
     }
 
     template<typename T>
-    requires (std::integral<T>)
+    requires (std::integral<T> || std::same_as<T,bool> || std::same_as<T, char>)
     std::size_t getSize(T arg){
         return sizeof(T);
     }
@@ -42,6 +42,8 @@ public:
     std::size_t getSize(T arg){
         return sizeof(std::size_t) + arg.size();
     }
+
+    // object must have a getSize method
 
     ~Client();
 private:

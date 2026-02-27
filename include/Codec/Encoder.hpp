@@ -29,4 +29,6 @@ public:
         }
         msg.addData(arg);
     }
+
+    // object must have encode function as well
 };
