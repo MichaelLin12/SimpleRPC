@@ -6,7 +6,7 @@
 #include <cstring>
 #include <iostream>
 
-//size must include sz as well even if not explicit
+//size must include sz as well even if not explicit. It is up to the user
 Message::Message(std::size_t size):buffer(size),offset{0},sz{size}{}
 
 std::span<std::byte> Message::getData(){
