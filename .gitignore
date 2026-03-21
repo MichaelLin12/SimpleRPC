@@ -13,3 +13,4 @@ build_logging
 server
 client
 llvm*
+analysis/lock-free/testSQ2

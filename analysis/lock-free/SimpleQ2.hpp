@@ -44,15 +44,25 @@ public: // assume capacity is correct
     bool offer(const T& element)
     {
         size_t head_t = head.load(std::memory_order_relaxed);
+        size_t tail_t = tail.load(std::memory_order_acquire);
+        size_t size = 0;
+        if (head_t >= tail_t)
+        {
+            size = head_t - tail_t;
+        }
+        else
+        {
+            size = capacity - head_t + tail_t;
+        }
+
+        if (size >= capacity)
+        {
+            return false;
+        }
 
         if (head_t == capacity)
         {
             head_t = 0;
-        }
-
-        if (head_t == tail.load(std::memory_order_acquire))
-        {
-            return false;
         }
 
         new (&data[head_t]) T(element);
@@ -64,18 +74,19 @@ public: // assume capacity is correct
     bool poll(T& ret)
     {
         size_t tail_t = tail.load(std::memory_order_relaxed);
-        if (tail_t == capacity)
-        {
-            tail_t = 0;
-        }
-
         if (tail_t == head.load(std::memory_order_acquire))
         {
             return false;
         }
 
+        if (tail_t == capacity)
+        {
+            tail_t = 0;
+        }
+
         ret = std::move(data[tail_t]);
         data[tail_t].~T();
+        ++tail_t;
         tail.store(tail_t, std::memory_order_release);
         return true;
     }
@@ -90,9 +101,9 @@ public: // assume capacity is correct
     {
         size_t head_t = head.load(std::memory_order_acquire);
         size_t tail_t = tail.load(std::memory_order_acquire);
-        if (tail_t >= head_t)
+        if (head_t >= tail_t)
         {
-            return tail_t - head_t;
+            return head_t - tail_t;
         }
 
         return capacity - head_t + tail_t;
