@@ -14,3 +14,5 @@ server
 client
 llvm*
 analysis/lock-free/testSQ2
+analysis/lock-free/testS2Q2
+analysis/lock-free/test2SQ2
