@@ -74,8 +74,8 @@ int main()
     std::cout << "Executing code in main" << std::endl;
     srand(time(NULL));
     Buffer buffer;
-    std::thread produceThread0(produceInt, std::ref(buffer));
-    std::thread produceThread1(consumeInt, std::ref(buffer));
+    std::jthread produceThread0(produceInt, std::ref(buffer));
+    std::jthread produceThread1(consumeInt, std::ref(buffer));
 
     produceThread0.join();
     produceThread1.join();
