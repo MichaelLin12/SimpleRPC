@@ -110,16 +110,11 @@ public: // assume capacity is correct
     }
 
 private:
-#ifdef __cpp_lib_hardware_interference_size
-    static constexpr size_t cache_line_size =
-        std::hardware_destructive_interference_size;
-#else
-    static constexpr size_t cache_line_size = 64;
-#endif
-
     static_assert(std::atomic<std::size_t>::is_always_lock_free);
-    alignas(cache_line_size) std::atomic<size_t> head;
-    alignas(cache_line_size) std::atomic<size_t> tail;
+    alignas(
+        std::hardware_destructive_interference_size) std::atomic<size_t> head;
+    alignas(
+        std::hardware_destructive_interference_size;) std::atomic<size_t> tail;
     const std::size_t capacity;
     T* data;
 };
