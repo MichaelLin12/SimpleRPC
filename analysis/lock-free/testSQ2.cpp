@@ -1,6 +1,6 @@
-#pragma once
 #include <atomic>
 #include <cstddef>
+#include <iostream>
 #include <limits>
 #include <stdexcept>
 
@@ -50,7 +50,7 @@ public: // assume capacity is correct
             head_t = 0;
         }
 
-        if (head_t == tail.load(std::memory_order_acquire))
+        if (size() == capacity)
         {
             return false;
         }
@@ -112,3 +112,13 @@ private:
     const std::size_t capacity;
     T* data;
 };
+
+int main()
+{
+    SimpleQ<int> buffer{10};
+    buffer.offer(2);
+    int ret = 0;
+    buffer.poll(ret);
+    std::cout << ret << std::endl;
+    return 0;
+}
