@@ -1,15 +1,113 @@
 #pragma once
+#include <atomic>
+#include <cstddef>
+#include <limits>
+#include <stdexcept>
+
+// spsc
 
 template <typename T>
 class SQBuff
 {
-public:
-    SQBuff(std::size_t capacity);
-    ~SQBuff();
-    bool offer(const T& element);
-    bool poll(T& ret);
-    bool empty() const;
-    size_t size() const;
+public: // assume capacity is correct
+    SQBuff(std::size_t capacity) : head{0}, tail{0}, capacity{capacity}
+    {
+        if (capacity == 0)
+        {
+            throw std::invalid_argument(
+                "Queue capacity must be greater than zero.");
+        }
+
+        if (capacity == std::numeric_limits<size_t>::max())
+        {
+            throw std::overflow_error(
+                "Queue capacity overflow, ensure capacity does not exceed "
+                "std::numeric_limits<size_t>::max()) - 1");
+        }
+        data = static_cast<T*>(::operator new[](capacity * sizeof(T)));
+    }
+
+    ~SQBuff()
+    {
+        size_t t = tail.load(std::memory_order_relaxed);
+        size_t h = head.load(std::memory_order_relaxed);
+        while (t != h)
+        {
+            if (t == capacity)
+                t = 0;
+            data[t].~T();
+            ++t;
+        }
+        ::operator delete[](data);
+    }
+
+    bool offer(const T& element)
+    {
+        size_t head_t = head.load(std::memory_order_relaxed);
+        size_t tail_t = tail.load(std::memory_order_acquire);
+        size_t size = 0;
+        if (head_t >= tail_t)
+        {
+            size = head_t - tail_t;
+        }
+        else
+        {
+            size = capacity - head_t + tail_t;
+        }
+
+        if (size >= capacity)
+        {
+            return false;
+        }
+
+        if (head_t == capacity)
+        {
+            head_t = 0;
+        }
+
+        new (&data[head_t]) T(element);
+        ++head_t;
+        head.store(head_t, std::memory_order_release);
+        return true;
+    }
+
+    bool poll(T& ret)
+    {
+        size_t tail_t = tail.load(std::memory_order_relaxed);
+        if (tail_t == head.load(std::memory_order_acquire))
+        {
+            return false;
+        }
+
+        if (tail_t == capacity)
+        {
+            tail_t = 0;
+        }
+
+        ret = std::move(data[tail_t]);
+        data[tail_t].~T();
+        ++tail_t;
+        tail.store(tail_t, std::memory_order_release);
+        return true;
+    }
+
+    bool empty() const
+    {
+        return tail.load(std::memory_order_acquire) ==
+               head.load(std::memory_order_acquire);
+    }
+
+    size_t size() const
+    {
+        size_t head_t = head.load(std::memory_order_acquire);
+        size_t tail_t = tail.load(std::memory_order_acquire);
+        if (head_t >= tail_t)
+        {
+            return head_t - tail_t;
+        }
+
+        return capacity - head_t + tail_t;
+    }
 
 private:
     static_assert(std::atomic<std::size_t>::is_always_lock_free);
