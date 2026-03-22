@@ -114,7 +114,7 @@ private:
     alignas(
         std::hardware_destructive_interference_size) std::atomic<size_t> head;
     alignas(
-        std::hardware_destructive_interference_size;) std::atomic<size_t> tail;
+        std::hardware_destructive_interference_size) std::atomic<size_t> tail;
     const std::size_t capacity;
     T* data;
 };
