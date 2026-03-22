@@ -8,10 +8,10 @@ inline void setNonBlocking(int sockfd)
     fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
 }
 
-inline int addSocket(int epfd, int sockfd)
+inline int addSocket(int epfd, int sockfd, uint32_t echecks)
 {
     struct epoll_event event;
-    event.events = EPOLLIN;
+    event.events = echecks;
     event.data.fd = sockfd;
     return epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &event);
 }

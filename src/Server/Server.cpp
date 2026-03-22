@@ -90,7 +90,7 @@ void Server::run()
     int event_count = 0;
     int i = 0;
 
-    if (addSocket(epfd, sockfd))
+    if (addSocket(epfd, sockfd, EPOLLIN))
     {
         LOGGING(LogLevel::ERROR, "Failed to add file descriptor to epoll: {}",
                 strerror(errno));
@@ -103,32 +103,27 @@ void Server::run()
     auto fn = [this](int new_fd)
     {
         Decoder decoder{};
-        while (true)
+        size_t sz = receiveSize(new_fd);
+        if (sz == 0)
         {
-            size_t sz = receiveSize(new_fd);
-            if (sz == 0)
-            {
-                break;
-            }
-            Message m{sz};
-            m.addData(sz);
-            std::size_t received =
-                receiveAll(new_fd, m.getData(), m.getSize() - m.getOffset());
-            if (!received)
-                break;
-            std::string name = decoder.decode<std::string>(m);
-            std::span<std::byte> argBytes = m.getData();
-            auto handler = functions[name]; // assume always true for now
-            handler.call(
-                handler.functionPointer, new_fd,
-                m); // assume works as intended for now -- as in no errors
+            return;
         }
-        close(new_fd); // we can't close here
+        Message m{sz};
+        m.addData(sz);
+        std::size_t received =
+            receiveAll(new_fd, m.getData(), m.getSize() - m.getOffset());
+        if (!received)
+            return;
+        std::string name = decoder.decode<std::string>(m);
+        std::span<std::byte> argBytes = m.getData();
+        auto handler = functions[name]; // assume always true for now
+        handler.call(handler.functionPointer, new_fd,
+                     m); // assume works as intended for now -- as in no errors
     };
     while (running)
     {
         LOGGING(LogLevel::INFO, "Polling for input...");
-        event_count = epoll_wait(epfd, events, MAX_EVENTS, 30000);
+        event_count = epoll_wait(epfd, events, MAX_EVENTS, TIMEOUT);
         LOGGING(LogLevel::INFO, "{} ready events", event_count);
         for (i = 0; i < event_count; i++)
         {
@@ -145,7 +140,7 @@ void Server::run()
                 }
 
                 setNonBlocking(new_fd);
-                if (addSocket(epfd, new_fd))
+                if (addSocket(epfd, new_fd, EPOLLIN | EPOLLRDHUP))
                 {
                     LOGGING(LogLevel::ERROR,
                             "Failed to add file descriptor to epoll: {}",
@@ -153,6 +148,12 @@ void Server::run()
                     close(new_fd);
                     continue;
                 }
+            }
+            else if (events[i].events & EPOLLRDHUP)
+            {
+                LOGGING(LogLevel::INFO, "client has closed socket");
+                epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, nullptr);
+                close(events[i].data.fd);
             }
             else
             {
@@ -195,11 +196,10 @@ std::size_t Server::receiveSize(int socket)
             std::abort();
         }
         if (bytes == 0)
-        { // client side has closed
+        { // client side has closed -- need to better handle this error
             LOGGING(LogLevel::INFO,
                     "received 0 bytes ... you should close the socket");
             break;
-            // std::abort();
         }
         received += bytes;
     }
