@@ -106,7 +106,7 @@ void Server::run()
     {
         LOGGING(LogLevel::INFO, "Polling for input...");
         event_count = epoll_wait(epfd, events, MAX_EVENTS, TIMEOUT);
-        if (event_count <= 0)
+        if (event_count <= 0) [[unlikely]]
         {
             LOGGING(LogLevel::ERROR, "epoll_wait error {}", strerror(errno));
         }
@@ -115,18 +115,18 @@ void Server::run()
         {
             LOGGING(LogLevel::INFO, "Reading file descriptor: {}",
                     events[i].data.fd);
-            if (events[i].data.fd == sockfd)
+            if (events[i].data.fd == sockfd) [[likely]]
             {
                 // we have a new connection
                 int new_fd =
                     accept(sockfd, (struct sockaddr*)&their_addr, &sin_size);
-                if (new_fd == -1)
+                if (new_fd == -1) [[unlikely]]
                 {
                     continue;
                 }
 
                 setNonBlocking(new_fd);
-                if (addSocket(epfd, new_fd, EPOLLIN | EPOLLRDHUP))
+                if (addSocket(epfd, new_fd, EPOLLIN | EPOLLRDHUP)) [[unlikely]]
                 {
                     LOGGING(LogLevel::ERROR,
                             "Failed to add file descriptor to epoll: {}",
@@ -135,20 +135,20 @@ void Server::run()
                     continue;
                 }
             }
-            else if (events[i].events & EPOLLRDHUP)
+            else if (events[i].events & EPOLLRDHUP) [[unlikely]]
             {
                 LOGGING(LogLevel::INFO, "client has closed socket");
                 epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, nullptr);
                 close(events[i].data.fd);
             }
-            else
+            else [[likely]]
             {
                 buffer.offer(events[i].data.fd);
             }
         }
     }
 
-    if (close(epfd))
+    if (close(epfd)) [[unlikely]]
     {
         LOGGING(LogLevel::ERROR, "Failed to close epoll file descriptor: {}",
                 strerror(errno));
