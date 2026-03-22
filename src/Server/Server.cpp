@@ -111,7 +111,16 @@ void Server::run()
         {
             LOGGING(LogLevel::INFO, "Reading file descriptor: {}",
                     events[i].data.fd);
-            if (events[i].data.fd == sockfd)
+            if (event_count == 0)
+            {
+                continue;
+            }
+            else if (event_count < 0)
+            {
+                LOGGING(LogLevel::ERROR, "epoll_wait error {}",
+                        strerror(errno));
+            }
+            else if (events[i].data.fd == sockfd)
             {
                 // we have a new connection
                 int new_fd =
