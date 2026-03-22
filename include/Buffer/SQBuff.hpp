@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/Logger.hpp"
 #include <atomic>
 #include <cstddef>
 #include <limits>
@@ -14,15 +15,16 @@ public: // assume capacity is correct
     {
         if (capacity == 0)
         {
-            throw std::invalid_argument(
-                "Queue capacity must be greater than zero.");
+            LOGGING(LogLevel::ERROR, "Queue capacity must be greater than 0");
+            std::abort();
         }
 
         if (capacity == std::numeric_limits<size_t>::max())
         {
-            throw std::overflow_error(
-                "Queue capacity overflow, ensure capacity does not exceed "
-                "std::numeric_limits<size_t>::max()) - 1");
+            LOGGGING(LogLevel::ERROR,
+                     "Queue capacity overflow, ensure capacity does not exceed "
+                     "std::numeric_limits<size_t>::max() - 1");
+            std::abort();
         }
         data = static_cast<T*>(::operator new[](capacity * sizeof(T)));
     }
