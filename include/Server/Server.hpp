@@ -1,4 +1,5 @@
 #pragma once
+#include "Buffer/SQBuff.hpp"
 #include "Codec/Decoder.hpp"
 #include "Codec/Encoder.hpp"
 #include "Msg/Message.hpp"
@@ -8,6 +9,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <thread>
 #include <tuple>
 
 template <typename Ret, typename... Args>
@@ -34,13 +36,14 @@ class Server
 public:
     Server();
     void create();
+    void createWorkerThread();
     void run();
     ~Server();
     std::size_t receiveSize(int socket);
 
     template <typename Ret, typename... Args>
     void registerFunction(std::string key, Ret (*func)(Args... args))
-    {
+    { // potential race here
         functions.insert(std::make_pair(
             std::move(key),
             Handler{&dispatcher<Ret, Args...>, reinterpret_cast<void*>(func)}));
@@ -49,4 +52,6 @@ public:
 private:
     int sockfd;
     std::map<std::string, Handler> functions;
+    SQBuff<int> buffer;
+    std::jthread workerThread;
 };

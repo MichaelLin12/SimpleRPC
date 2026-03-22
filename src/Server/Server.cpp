@@ -74,6 +74,8 @@ void Server::create()
     {
         std::abort();
     }
+
+    createWorkerThread();
 }
 
 void Server::run()
@@ -100,26 +102,6 @@ void Server::run()
 
     struct sockaddr_storage their_addr;
     socklen_t sin_size = sizeof(their_addr);
-    auto fn = [this](int new_fd)
-    {
-        Decoder decoder{};
-        size_t sz = receiveSize(new_fd);
-        if (sz == 0)
-        {
-            return;
-        }
-        Message m{sz};
-        m.addData(sz);
-        std::size_t received =
-            receiveAll(new_fd, m.getData(), m.getSize() - m.getOffset());
-        if (!received)
-            return;
-        std::string name = decoder.decode<std::string>(m);
-        std::span<std::byte> argBytes = m.getData();
-        auto handler = functions[name]; // assume always true for now
-        handler.call(handler.functionPointer, new_fd,
-                     m); // assume works as intended for now -- as in no errors
-    };
     while (running)
     {
         LOGGING(LogLevel::INFO, "Polling for input...");
@@ -157,11 +139,7 @@ void Server::run()
             }
             else
             {
-                // we need to run something
-                std::future<void> fut = std::async(
-                    fn,
-                    events[i].data.fd); // maybe how we do this is to use spsc
-                                        // here and do things
+                buffer.offer(events[i].data.fd);
             }
         }
     }
@@ -174,14 +152,56 @@ void Server::run()
     }
 }
 
+void Server::createWorkerThread()
+{
+    auto fn = [this](int new_fd)
+    {
+        Decoder decoder{};
+        size_t sz = receiveSize(new_fd);
+        if (sz == 0)
+        {
+            return;
+        }
+        Message m{sz};
+        m.addData(sz);
+        std::size_t received =
+            receiveAll(new_fd, m.getData(), m.getSize() - m.getOffset());
+        if (!received)
+            return;
+        std::string name = decoder.decode<std::string>(m);
+        std::span<std::byte> argBytes = m.getData();
+        auto handler = functions[name]; // assume always true for now
+        handler.call(handler.functionPointer, new_fd,
+                     m); // assume works as intended for now -- as in no errors
+    };
+
+    auto worker = [this, fn](std::stop_token stoken)
+    {
+        int fd;
+        while (!stoken.stop_requested())
+        {
+            if (buffer.poll(fd))
+            {
+                fn(fd);
+            }
+            else
+            {
+                std::this_thread::yield();
+            }
+        }
+    };
+    workerThread = std::jthread{worker};
+}
+
 Server::~Server()
 {
+    workerThread.request_stop();
     if (sockfd == -1)
         return;
     close(sockfd);
 }
 
-Server::Server() : sockfd{-1}, functions{} {}
+Server::Server() : sockfd{-1}, functions{}, buffer{BUFFERSIZE} {}
 
 std::size_t Server::receiveSize(int socket)
 {
@@ -190,9 +210,10 @@ std::size_t Server::receiveSize(int socket)
     while (received < sizeof(std::size_t))
     {
         ssize_t bytes = recv(socket, &buf, sizeof(std::size_t), 0);
-        if (bytes == -1)
+        if (bytes == -1 && errno != EAGAIN)
         {
-            LOGGING(LogLevel::INFO, "somthing wrong happened");
+            LOGGING(LogLevel::INFO, "somthing wrong happened {}",
+                    strerror(errno));
             std::abort();
         }
         if (bytes == 0)

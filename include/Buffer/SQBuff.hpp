@@ -21,9 +21,9 @@ public: // assume capacity is correct
 
         if (capacity == std::numeric_limits<size_t>::max())
         {
-            LOGGGING(LogLevel::ERROR,
-                     "Queue capacity overflow, ensure capacity does not exceed "
-                     "std::numeric_limits<size_t>::max() - 1");
+            LOGGING(LogLevel::ERROR,
+                    "Queue capacity overflow, ensure capacity does not exceed "
+                    "std::numeric_limits<size_t>::max() - 1");
             std::abort();
         }
         data = static_cast<T*>(::operator new[](capacity * sizeof(T)));
@@ -113,10 +113,8 @@ public: // assume capacity is correct
 
 private:
     static_assert(std::atomic<std::size_t>::is_always_lock_free);
-    alignas(
-        std::hardware_destructive_interference_size) std::atomic<size_t> head;
-    alignas(
-        std::hardware_destructive_interference_size) std::atomic<size_t> tail;
+    alignas(64) std::atomic<size_t> head;
+    alignas(64) std::atomic<size_t> tail;
     const std::size_t capacity;
     T* data;
 };
