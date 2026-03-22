@@ -106,21 +106,16 @@ void Server::run()
     {
         LOGGING(LogLevel::INFO, "Polling for input...");
         event_count = epoll_wait(epfd, events, MAX_EVENTS, TIMEOUT);
+        if (event_count <= 0)
+        {
+            LOGGING(LogLevel::ERROR, "epoll_wait error {}", strerror(errno));
+        }
         LOGGING(LogLevel::INFO, "{} ready events", event_count);
         for (i = 0; i < event_count; i++)
         {
             LOGGING(LogLevel::INFO, "Reading file descriptor: {}",
                     events[i].data.fd);
-            if (event_count == 0)
-            {
-                continue;
-            }
-            else if (event_count < 0)
-            {
-                LOGGING(LogLevel::ERROR, "epoll_wait error {}",
-                        strerror(errno));
-            }
-            else if (events[i].data.fd == sockfd)
+            if (events[i].data.fd == sockfd)
             {
                 // we have a new connection
                 int new_fd =
