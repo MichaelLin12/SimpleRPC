@@ -1,18 +1,23 @@
 #include "Codec/Decoder.hpp"
 #include "Msg/Message.hpp"
 #include "Utility/Constants.hpp"
+#include "Utility/Helper.hpp"
 #include "Utility/Logger.hpp"
 #include "Utility/TransCeive.hpp"
 #include <Server/Server.hpp>
 #include <arpa/inet.h>
 #include <array>
 #include <bit>
+#include <cerrno>
 #include <cstring>
 #include <future>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <stdexcept>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h> // close
 #include <unistd.h>
 
 void Server::create()
@@ -63,6 +68,8 @@ void Server::create()
         std::abort();
     }
 
+    setNonBlocking(sockfd);
+
     if (listen(sockfd, BACKLOG) == -1)
     {
         std::abort();
@@ -71,6 +78,26 @@ void Server::create()
 
 void Server::run()
 {
+    int epfd = epoll_create1(0);
+    if (epfd == -1)
+    {
+        LOGGING(LogLevel::ERROR, "cannot create epoll: {}", strerror(errno));
+        throw std::runtime_error(strerror(errno)); // change
+    }
+
+    struct epoll_event events[MAX_EVENTS];
+    int running = 1;
+    int event_count = 0;
+    int i = 0;
+
+    if (addSocket(epfd, sockfd))
+    {
+        LOGGING(LogLevel::ERROR, "Failed to add file descriptor to epoll: {}",
+                strerror(errno));
+        close(epfd);
+        return;
+    }
+
     struct sockaddr_storage their_addr;
     socklen_t sin_size = sizeof(their_addr);
     auto fn = [this](int new_fd)
@@ -92,21 +119,57 @@ void Server::run()
             std::string name = decoder.decode<std::string>(m);
             std::span<std::byte> argBytes = m.getData();
             auto handler = functions[name]; // assume always true for now
-            handler.call(handler.functionPointer, new_fd,
-                         m); // assume works as intended for now
+            handler.call(
+                handler.functionPointer, new_fd,
+                m); // assume works as intended for now -- as in no errors
         }
-        close(new_fd);
+        close(new_fd); // we can't close here
     };
-    while (true)
+    while (running)
     {
-        int new_fd = accept(sockfd, (struct sockaddr*)&their_addr, &sin_size);
-        if (new_fd == -1)
+        LOGGING(LogLevel::INFO, "Polling for input...");
+        event_count = epoll_wait(epfd, events, MAX_EVENTS, 30000);
+        LOGGING(LogLevel::INFO, "{} ready events", event_count);
+        for (i = 0; i < event_count; i++)
         {
-            return;
+            LOGGING(LogLevel::INFO, "Reading file descriptor: {}",
+                    events[i].data.fd);
+            if (events[i].data.fd == sockfd)
+            {
+                // we have a new connection
+                int new_fd =
+                    accept(sockfd, (struct sockaddr*)&their_addr, &sin_size);
+                if (new_fd == -1)
+                {
+                    continue;
+                }
+
+                setNonBlocking(new_fd);
+                if (addSocket(epfd, new_fd))
+                {
+                    LOGGING(LogLevel::ERROR,
+                            "Failed to add file descriptor to epoll: {}",
+                            strerror(errno));
+                    close(new_fd);
+                    continue;
+                }
+            }
+            else
+            {
+                // we need to run something
+                std::future<void> fut = std::async(
+                    fn,
+                    events[i].data.fd); // maybe how we do this is to use spsc
+                                        // here and do things
+            }
         }
-        std::future<void> fut = std::async(
-            fn,
-            new_fd); // maybe how we do this is to use spsc here and do things
+    }
+
+    if (close(epfd))
+    {
+        LOGGING(LogLevel::ERROR, "Failed to close epoll file descriptor: {}",
+                strerror(errno));
+        return;
     }
 }
 
