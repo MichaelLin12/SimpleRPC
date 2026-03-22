@@ -13,13 +13,13 @@ class SQBuff
 public: // assume capacity is correct
     SQBuff(std::size_t capacity) : head{0}, tail{0}, capacity{capacity}
     {
-        if (capacity == 0)
+        if (capacity == 0) [[unlikely]]
         {
             LOGGING(LogLevel::ERROR, "Queue capacity must be greater than 0");
             std::abort();
         }
 
-        if (capacity == std::numeric_limits<size_t>::max())
+        if (capacity == std::numeric_limits<size_t>::max()) [[unlikely]]
         {
             LOGGING(LogLevel::ERROR,
                     "Queue capacity overflow, ensure capacity does not exceed "
