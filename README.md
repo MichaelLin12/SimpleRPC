@@ -12,7 +12,7 @@ Built as a deep-dive into the systems-level mechanics of inter-process communica
 # Architecture
 The design separates I/O and execution into distinct stages:
 
-- I/O layer (planned): A single epoll-based event loop monitors all active client connections. When a connection has data ready, the request is read and packaged into a lightweight request struct. This keeps the I/O path fully non-blocking without per-connection threads.
+- I/O layer: A single epoll-based event loop monitors all active client connections. When a connection has data ready, the request is read and packaged into a lightweight request struct. This keeps the I/O path fully non-blocking without per-connection threads.
 - Handoff: The packaged request is pushed onto a lock-free SPSC queue, decoupling the I/O thread from the execution thread with minimal synchronization overhead.
 - Execution layer: A dedicated worker thread consumes requests from the queue, deserializes the payload, dispatches to the appropriate handler, and writes the response back to the client.
 
@@ -23,7 +23,7 @@ TCP was chosen as the transport layer for its ordering and exactly-once delivery
 ## Components
 - SPSC Queue — lock-free single-producer single-consumer queue. Benchmarks in progress.
 Serialization — custom binary serialization/deserialization layer over TCP with focus on minimal overhead
-- Transport — TCP socket layer with planned epoll-based multi-client support
+- Transport — TCP socket layer with epoll-based multi-client support
 
 # Build
 
@@ -33,5 +33,15 @@ Serialization — custom binary serialization/deserialization layer over TCP wit
 
 `cd ./build`
 `cd ./sample`
-`cd ./server`
-`cd ./client`
+`./server`
+`./client`
+
+# RoadMap
+- MPMC Queue - Switch the SPSC Queue to be MPMC so that multiple consumers can consume the queue
+- Concurrent hashmap - Use a concurrent hashmap to avoid race conditions while registering functions
+- Flat hasmap - use a flat hashmap as it has better
+- Error Handling - allow for the server to send back errors to the client
+- Void handling - allow for the server to execute void functions and return back nothing
+- Heart Beats - allow for multiple servers to be spun up allow for detection of heartbeating
+- Data Sharing - enable multiple servers to gossip data back and forth about the different connections and functions registered
+- Logging - update logging to use fmt::println
