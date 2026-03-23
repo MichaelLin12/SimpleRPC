@@ -1,6 +1,8 @@
 # SimpleRPC
 
 ![C++](https://img.shields.io/badge/C++-23-blue?logo=cplusplus&logoColor=white)
+![C](https://img.shields.io/badge/C-A8B9CC?style=flat&logo=c&logoColor=white)
+![Clang](https://img.shields.io/badge/Clang-F34B7D?style=flat&logo=llvm&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-3.20+-green?logo=cmake&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
