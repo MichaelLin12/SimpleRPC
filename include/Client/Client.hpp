@@ -1,51 +1,58 @@
 #pragma once
-#include <string>
-#include <concepts>
-#include <type_traits>
-#include "Codec/Encoder.hpp"
 #include "Codec/Decoder.hpp"
+#include "Codec/Encoder.hpp"
 #include "Msg/Message.hpp"
 #include "Utility/TransCeive.hpp"
+#include <concepts>
+#include <string>
+#include <type_traits>
 
-
-class Client{
+class Client
+{
 public:
-    Client()=default;
+    Client() = default;
     void create();
 
-    template<typename R,typename... Args>
-    R call(const std::string& funcName,Args&&... args){
+    template <typename R, typename... Args>
+    R call(const std::string& funcName, Args&&... args)
+    {
         Encoder encoder{};
         Decoder decoder{};
-        std::size_t size = sizeof(size_t) + getSize(funcName) + (getSize<std::remove_cvref_t<Args>>(args) + ...);
+        std::size_t size = sizeof(size_t) + getSize(funcName) +
+                           (getSize<std::remove_cvref_t<Args>>(args) + ...);
         Message m{size};
-        encoder.encode(size,m);
-        encoder.encode(funcName,m);
-        (encoder.encode<std::remove_cvref_t<Args>>(args,m),...);
-        sendAll(sockfd,m.getBuffer());
+        encoder.encode(size, m);
+        encoder.encode(funcName, m);
+        (encoder.encode<std::remove_cvref_t<Args>>(args, m), ...);
+        sendAll(sockfd, m.getBuffer());
         Message rec{sizeof(R)};
         LOGGING(LogLevel::DEBUG, "rec size: {}", rec.getSize());
         LOGGING(LogLevel::DEBUG, "rec offset: {}", rec.getOffset());
-        receiveAll(sockfd,rec.getBuffer(),rec.getSize());
+        receiveAll(sockfd, rec.getBuffer(), rec.getSize());
         R rt = decoder.decode<R>(rec);
         return rt;
     }
 
-    template<typename T>
-    requires (std::integral<T> || std::same_as<T,bool> || std::same_as<T, char>)
-    std::size_t getSize(T arg){
+    template <typename T>
+        requires(std::integral<T> || std::same_as<T, bool> ||
+                 std::same_as<T, char>)
+    std::size_t getSize(T arg)
+    {
+        (void)arg;
         return sizeof(T);
     }
 
-    template<typename T>
-    requires (std::same_as<T,std::string>)
-    std::size_t getSize(T arg){
+    template <typename T>
+        requires(std::same_as<T, std::string>)
+    std::size_t getSize(T arg)
+    {
         return sizeof(std::size_t) + arg.size();
     }
 
     // object must have a getSize method
 
     ~Client();
+
 private:
     int sockfd;
 };

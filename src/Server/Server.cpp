@@ -84,7 +84,7 @@ void Server::run()
     if (epfd == -1)
     {
         LOGGING(LogLevel::ERROR, "cannot create epoll: {}", strerror(errno));
-        throw std::runtime_error(strerror(errno)); // change
+        std::abort();
     }
 
     struct epoll_event events[MAX_EVENTS];
@@ -173,7 +173,6 @@ void Server::createWorkerThread()
         if (!received)
             return;
         std::string name = decoder.decode<std::string>(m);
-        std::span<std::byte> argBytes = m.getData();
         auto handler = functions[name]; // assume always true for now
         handler.call(handler.functionPointer, new_fd,
                      m); // assume works as intended for now -- as in no errors

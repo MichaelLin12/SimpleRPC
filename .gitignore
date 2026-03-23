@@ -1,6 +1,10 @@
 #ignore all build directories
 build
 build_logging
+build_debugging
+build_debugging_address
+build_debugging_threads
+release
 
 
 # ignore all binaries and object files
