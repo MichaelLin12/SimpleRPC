@@ -8,7 +8,7 @@
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 ![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
 
-A high-performance RPC framework in modern C++ designed around a lock-free architecture and event-driven I/O multiplexing.
+An RPC framework in modern C++ designed around a lock-free architecture and event-driven I/O multiplexing.
 Built as a deep-dive into the systems-level mechanics of inter-process communication — serialization overhead, lock-free data structures, and non-blocking I/O — informed by production experience on a DDS-based distributed defense system.
 
 # Architecture
