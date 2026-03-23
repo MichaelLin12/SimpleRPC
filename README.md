@@ -27,6 +27,10 @@ TCP was chosen as the transport layer for its ordering and exactly-once delivery
 Serialization — custom binary serialization/deserialization layer over TCP with focus on minimal overhead
 - Transport — TCP socket layer with epoll-based multi-client support
 
+# Libraries
+- Standard Template Library
+- FMT
+
 # Build
 
 `./CMakeBuilds.sh`
@@ -46,4 +50,5 @@ Serialization — custom binary serialization/deserialization layer over TCP wit
 - Void handling - allow for the server to execute void functions and return back nothing
 - Heart Beats - allow for multiple servers to be spun up allow for detection of heartbeating
 - Data Sharing - enable multiple servers to gossip data back and forth about the different connections and functions registered
-- **Logging - update logging to use fmt::println**
+- ~~Logging - update logging to use fmt::println~~
+
