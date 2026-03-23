@@ -31,10 +31,10 @@ Serialization — custom binary serialization/deserialization layer over TCP wit
 
 # Run
 
-`cd ./build`
-`cd ./sample`
-`./server`
-`./client`
+- `cd ./build`
+- `cd ./sample`
+- `./server`
+- `./client`
 
 # RoadMap
 - MPMC Queue - Switch the SPSC Queue to be MPMC so that multiple consumers can consume the queue
