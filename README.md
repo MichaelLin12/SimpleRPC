@@ -44,4 +44,4 @@ Serialization — custom binary serialization/deserialization layer over TCP wit
 - Void handling - allow for the server to execute void functions and return back nothing
 - Heart Beats - allow for multiple servers to be spun up allow for detection of heartbeating
 - Data Sharing - enable multiple servers to gossip data back and forth about the different connections and functions registered
-- Logging - update logging to use fmt::println
+- **Logging - update logging to use fmt::println**
