@@ -8,3 +8,4 @@
 - Data Sharing - enable multiple servers to gossip data back and forth about the different connections and functions registered
 - Optimize for performace
 - ~~Logging - update logging to use fmt::println~~
+- rpcCompliant support
