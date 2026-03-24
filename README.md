@@ -18,6 +18,7 @@ Built as a deep-dive into the systems-level mechanics of inter-process communica
 - [Libraries](#libraries)
 - [Build](#build)
 - [Run](#run)
+- [Credits](#credits)
 
 # Architecture
 The design separates I/O and execution into distinct stages:
@@ -49,4 +50,8 @@ Serialization — custom binary serialization/deserialization layer over TCP wit
 - `cd ./sample`
 - `./server`
 - `./client`
+
+# Credits
+
+[Michael Lin](https://www.linkedin.com/in/michaellin12white/)
 
