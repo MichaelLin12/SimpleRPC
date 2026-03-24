@@ -1,0 +1,10 @@
+# RoadMap
+- MPMC Queue - Switch the SPSC Queue to be MPMC so that multiple consumers can consume the queue
+- Concurrent hashmap - Use a concurrent hashmap to avoid race conditions while registering functions
+- Flat hashmap - use a flat hashmap as it has better
+- Error Handling - allow for the server to send back errors to the client
+- **Void handling - allow for the server to execute void functions and return back nothing**
+- Heart Beats - allow for multiple servers to be spun up allow for detection of heartbeating
+- Data Sharing - enable multiple servers to gossip data back and forth about the different connections and functions registered
+- Optimize for performace
+- ~~Logging - update logging to use fmt::println~~
