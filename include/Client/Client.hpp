@@ -16,8 +16,8 @@ public:
     template <typename R, typename... Args>
     R call(const std::string& funcName, Args&&... args)
     {
-        Encoder encoder{};
-        Decoder decoder{};
+        Encoder encoder{}; // May want to move this to an instance obj
+        Decoder decoder{}; // May want to move this to an instance obj
         std::size_t size = sizeof(size_t) + getSize(funcName) +
                            (getSize<std::remove_cvref_t<Args>>(args) + ...);
         Message m{size};
