@@ -10,3 +10,4 @@
 - ~~Logging - update logging to use fmt::println~~
 - rpcCompliant support
 - avoid having the main thread and worker thread share a socket at the same time by using epolloneshot and using a pipe backwards to deal with the situation
+- use fixed width types wherever possible
