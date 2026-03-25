@@ -1,5 +1,4 @@
 #pragma once
-#include "Utility/Colors.hpp"
 #include <cerrno>
 #include <chrono>
 #include <cstring>
@@ -33,20 +32,22 @@ enum class LogLevel
 
 inline void log_debug(const std::string& s)
 {
-    fmt::print("{}{} PID: {} TID: {} {} {}{}\n", BOLDWHITE, __FILE__, getpid(),
-               gettid(), std::chrono::system_clock::now(), s, RESET);
+    fmt::print(fmt::fg(fmt::color::cyan), "{} {} PID: {} TID: {} {} {}\n",
+               "[DEBUG]", __FILE_NAME__, getpid(), gettid(),
+               std::chrono::system_clock::now(), s);
 };
 
 inline void log_info(const std::string& s)
 {
-    fmt::print("{}{} PID: {} TID: {} {} {}{}\n", BOLDGREEN, __FILE__, getpid(),
-               gettid(), std::chrono::system_clock::now(), s, RESET);
+    fmt::print("{} {} PID: {} TID: {} {} {}\n", "[INFO]", __FILE_NAME__,
+               getpid(), gettid(), std::chrono::system_clock::now(), s);
 };
 
 inline void log_error(const std::string& s)
 {
-    fmt::print(stderr, "{}{} PID: {} TID: {} {} {}{}\n", BOLDRED, __FILE__,
-               getpid(), gettid(), std::chrono::system_clock::now(), s, RESET);
+    fmt::print(stderr, fmt::fg(fmt::color::red),
+               "{} {} PID: {} TID: {} {} {}\n", "[ERROR]", __FILE_NAME__,
+               getpid(), gettid(), std::chrono::system_clock::now(), s);
 };
 
 inline void logger(const LogLevel level, const std::string& s)
