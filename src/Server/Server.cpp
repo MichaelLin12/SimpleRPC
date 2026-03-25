@@ -108,6 +108,10 @@ void Server::run()
         event_count = epoll_wait(epfd, events, MAX_EVENTS, TIMEOUT);
         if (event_count <= 0) [[unlikely]]
         {
+            if (errno == EINTR)
+            {
+                continue;
+            }
             LOGGING(LogLevel::ERROR, "epoll_wait error {}", strerror(errno));
         }
         LOGGING(LogLevel::INFO, "{} ready events", event_count);
