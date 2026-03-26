@@ -34,7 +34,7 @@ The message format will vary slightly based on the message type. Below we list t
 
 `| Message Type | Message size | Function name | Args |`
 
-- The following message format will be used for Msg::Recv
+- The following message format will be used for Msg::Resp
 
 `| Message Type | Message Size | Return Value |`
 
