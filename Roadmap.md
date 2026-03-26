@@ -13,3 +13,4 @@
 - **use std::byte and uint8_t in the messages**
 - use a queue for logging
 - stop using std::size_t for size as its not fixed across architectures
+- **ensure const correctness**
