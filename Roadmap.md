@@ -11,3 +11,4 @@
 - rpcCompliant support
 - avoid having the main thread and worker thread share a socket at the same time by using epolloneshot and using a pipe backwards to deal with the situation
 - **use std::byte and uint8_t in the messages**
+- use a queue for logging
