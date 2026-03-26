@@ -14,3 +14,4 @@
 - use a queue for logging
 - stop using std::size_t for size as its not fixed across architectures
 - **ensure const correctness**
+- **add/delete copy and move functions**
