@@ -13,32 +13,16 @@ Built as a deep-dive into the systems-level mechanics of inter-process communica
 
 ## Table of Contents
 - [SimpleRPC](#simplerpc)
-- [Architecture](#architecture)
-- [Components](#components)
 - [Libraries](#libraries)
 - [Build](#build)
 - [Run](#run)
+- [Developer Notes](#developer-notes)
 - [Credits](#credits)
 
-# Architecture
-The design separates I/O and execution into distinct stages:
-
-- I/O layer: A single epoll-based event loop monitors all active client connections. When a connection has data ready, the request is read and packaged into a lightweight request struct. This keeps the I/O path fully non-blocking without per-connection threads.
-- Handoff: The packaged request is pushed onto a lock-free SPSC queue, decoupling the I/O thread from the execution thread with minimal synchronization overhead.
-- Execution layer: A dedicated worker thread consumes requests from the queue, deserializes the payload, dispatches to the appropriate handler, and writes the response back to the client.
-
----
-
-TCP was chosen as the transport layer for its ordering and exactly-once delivery guarantees, which are necessary for correct RPC semantics. UDP would require reimplementing these guarantees to avoid duplicate or out-of-order execution.
-
-## Components
-- SPSC Queue — lock-free single-producer single-consumer queue. Benchmarks in progress.
-Serialization — custom binary serialization/deserialization layer over TCP with focus on minimal overhead
-- Transport — TCP socket layer with epoll-based multi-client support
 
 # Libraries
 - Standard Template Library
-- FMT
+- fmt
 
 # Build
 
@@ -50,6 +34,18 @@ Serialization — custom binary serialization/deserialization layer over TCP wit
 - `cd ./sample`
 - `./server`
 - `./client`
+
+# Developer Notes
+
+To learn more about the internals of this project and what things are being worked on, it is encouraged to look through the following documentation:
+
+- [Roadmap](./docs/Roadmap.md) shares details of work either current or planned for this project. Any work that is bolded is currently being worked on at the moment.
+- [Developer Notes](./docs/DeveloperNotes.md) has information about why certain design decisions were made in the making of this project
+- [Protocol](./docs/Protocol.md) lists out all possible messages used in SimpleRPC
+- [Message](./docs/Message.md) gives an overview of all the methods and members of a message object
+- [MessageTypes](./docs/MessageTypes.md) details all the types of messages that can be passed around in SimpleRPC
+- [Serialization](./docs/Serialization.md) talks about how serialization works
+- [Deserialization](./docs/Deserialization.md) talks about how deserialization works
 
 # Credits
 

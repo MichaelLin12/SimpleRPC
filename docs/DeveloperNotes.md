@@ -9,7 +9,9 @@ dispatched, and how responses are matched back to their originating calls. In ge
 this should cover the bulk of the Architecture of the RPC framework.
 
 
+# Design Decisions
 
+TCP was chosen as the transport layer for its ordering and exactly-once delivery guarantees, which are necessary for correct RPC semantics. UDP would require reimplementing these guarantees to avoid duplicate or out-of-order execution.
 
 
 
