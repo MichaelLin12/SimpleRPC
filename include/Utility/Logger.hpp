@@ -13,7 +13,9 @@
 #define LOGGING(x, ...)                                                        \
     do                                                                         \
     {                                                                          \
-        std::string a = fmt::format(__VA_ARGS__);                              \
+        std::string a = fmt::format("{} PID:{} TID:{} ", __FILE_NAME__,        \
+                                    getpid(), gettid()) +                      \
+                        fmt::format(__VA_ARGS__);                              \
         logger((x), a);                                                        \
     } while (0)
 #else
@@ -32,22 +34,19 @@ enum class LogLevel
 
 inline void log_debug(const std::string& s)
 {
-    fmt::print(fmt::fg(fmt::color::cyan), "{} {} PID: {} TID: {} {} {}\n",
-               "[DEBUG]", __FILE_NAME__, getpid(), gettid(),
+    fmt::print(fmt::fg(fmt::color::cyan), "{} {} {}\n", "[DEBUG]",
                std::chrono::system_clock::now(), s);
 };
 
 inline void log_info(const std::string& s)
 {
-    fmt::print("{} {} PID: {} TID: {} {} {}\n", "[INFO]", __FILE_NAME__,
-               getpid(), gettid(), std::chrono::system_clock::now(), s);
+    fmt::print("{} {} {}\n", "[INFO]", std::chrono::system_clock::now(), s);
 };
 
 inline void log_error(const std::string& s)
 {
-    fmt::print(stderr, fmt::fg(fmt::color::red),
-               "{} {} PID: {} TID: {} {} {}\n", "[ERROR]", __FILE_NAME__,
-               getpid(), gettid(), std::chrono::system_clock::now(), s);
+    fmt::print(stderr, fmt::fg(fmt::color::red), "{} {} {}\n", "[ERROR]",
+               std::chrono::system_clock::now(), s);
 };
 
 inline void logger(const LogLevel level, const std::string& s)
