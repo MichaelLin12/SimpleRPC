@@ -2,6 +2,7 @@
 #include "Codec/Decoder.hpp"
 #include "Codec/Encoder.hpp"
 #include "Msg/Message.hpp"
+#include "Utility/Helper.hpp"
 #include "Utility/TransCeive.hpp"
 #include <concepts>
 #include <string>
@@ -14,22 +15,38 @@ public:
     void create();
 
     template <typename R, typename... Args>
-    R call(const std::string& funcName, Args&&... args)
+    R call(std::string& funcName, Args&&... args)
     {
-        Encoder encoder{}; // May want to move this to an instance obj
-        Decoder decoder{}; // May want to move this to an instance obj
         std::size_t size = sizeof(size_t) + getSize(funcName) +
-                           (getSize<std::remove_cvref_t<Args>>(args) + ...);
-        Message m{size};
-        encoder.encode(size, m);
+                           (getSize<std::remove_cvref_t<Args>>(args) + ...) + 1;
+        Message m{Msg::Send, size};
         encoder.encode(funcName, m);
         (encoder.encode<std::remove_cvref_t<Args>>(args, m), ...);
-        sendAll(sockfd, m.getBuffer());
-        Message rec{sizeof(R)};
-        LOGGING(LogLevel::DEBUG, "rec size: {}", rec.getSize());
-        LOGGING(LogLevel::DEBUG, "rec offset: {}", rec.getOffset());
-        receiveAll(sockfd, rec.getBuffer(), rec.getSize());
-        R rt = decoder.decode<R>(rec);
+        sendAll(sockfd, m);
+        Message rec = receiveMsg(sockfd);
+        rec.setOffset(sizeof(static_cast<uint8_t>(rec.getType())) +
+                      sizeof(rec.getSize()));
+        R rt{}; // assume default constructible for now
+        switch (rec.getType())
+        {
+            case Msg::Resp:
+            {
+                rt = decoder.decode<R>(rec);
+                break;
+            }
+            case Msg::Err:
+            {
+                break;
+            }
+            case Msg::Void:
+            {
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
         return rt;
     }
 
@@ -49,10 +66,10 @@ public:
         return sizeof(std::size_t) + arg.size();
     }
 
-    // object must have a getSize method
-
     ~Client();
 
 private:
     int sockfd;
+    Encoder encoder;
+    Decoder decoder;
 };

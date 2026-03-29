@@ -25,10 +25,9 @@ void dispatcher(void* fptr, int socket, Message& m)
 
     Ret rt = std::apply(func, arguments);
 
-    Message retM{sizeof(Ret)}; // no pointer
+    Message retM{Msg::Resp, sizeof(std::size_t) + sizeof(Ret) + 1};
     encoder.encode(rt, retM);
-    sendAll(socket,
-            retM.getBuffer()); // could be the case that it doesn't send all
+    sendAll(socket, retM); // could be the case that it doesn't send all
 }
 
 class Server
@@ -39,7 +38,6 @@ public:
     void createWorkerThread();
     void run();
     ~Server();
-    std::size_t receiveSize(int socket);
 
     template <typename Ret, typename... Args>
     void registerFunction(std::string key, Ret (*func)(Args... args))

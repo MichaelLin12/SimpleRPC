@@ -15,7 +15,7 @@ public:
 
     template <typename T>
         requires(std::same_as<T, std::string>)
-    void encode(const T& arg, Message& msg)
+    void encode(T& arg, Message& msg)
     {
         encode(arg.size(), msg);
         msg.addData(arg);
@@ -23,7 +23,7 @@ public:
 
     template <typename T>
         requires(std::integral<T>)
-    void encode(const T& arg, Message& msg)
+    void encode(T arg, Message& msg)
     {
         if constexpr (std::endian::native == std::endian::little &&
                       sizeof(arg) > 1)

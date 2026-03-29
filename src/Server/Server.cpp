@@ -1,5 +1,6 @@
 #include "Codec/Decoder.hpp"
 #include "Msg/Message.hpp"
+#include "Msg/MessageTypes.hpp"
 #include "Utility/Constants.hpp"
 #include "Utility/Helper.hpp"
 #include "Utility/Logger.hpp"
@@ -17,7 +18,6 @@
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h> // close
 #include <unistd.h>
 
 void Server::create()
@@ -130,7 +130,8 @@ void Server::run()
                 }
 
                 setNonBlocking(new_fd);
-                if (addSocket(epfd, new_fd, EPOLLIN | EPOLLRDHUP)) [[unlikely]]
+                if (addSocket(epfd, new_fd,
+                              EPOLLIN | EPOLLRDHUP | EPOLLONESHOT)) [[unlikely]]
                 {
                     LOGGING(LogLevel::ERROR,
                             "Failed to add file descriptor to epoll: {}",
@@ -165,17 +166,9 @@ void Server::createWorkerThread()
     auto fn = [this](int new_fd)
     {
         Decoder decoder{};
-        size_t sz = receiveSize(new_fd);
-        if (sz == 0)
-        {
-            return;
-        }
-        Message m{sz};
-        m.addData(sz);
-        std::size_t received =
-            receiveAll(new_fd, m.getData(), m.getSize() - m.getOffset());
-        if (!received)
-            return;
+        Message m = receiveMsg(new_fd);
+        m.setOffset(sizeof(static_cast<uint8_t>(m.getType())) +
+                    sizeof(m.getSize()));
         std::string name = decoder.decode<std::string>(m);
         auto handler = functions[name]; // assume always true for now
         handler.call(handler.functionPointer, new_fd,
@@ -209,28 +202,3 @@ Server::~Server()
 }
 
 Server::Server() : sockfd{-1}, functions{}, buffer{BUFFERSIZE} {}
-
-std::size_t Server::receiveSize(int socket)
-{
-    std::size_t buf = 0;
-    std::size_t received = 0;
-    while (received < sizeof(std::size_t))
-    {
-        ssize_t bytes = recv(socket, &buf, sizeof(std::size_t), 0);
-        if (bytes == -1 && errno != EAGAIN)
-        {
-            LOGGING(LogLevel::INFO, "somthing wrong happened {}",
-                    strerror(errno));
-            std::abort();
-        }
-        if (bytes == 0)
-        { // client side has closed -- need to better handle this error
-            LOGGING(LogLevel::INFO,
-                    "received 0 bytes ... you should close the socket");
-            break;
-        }
-        received += bytes;
-    }
-
-    return std::byteswap(buf);
-}

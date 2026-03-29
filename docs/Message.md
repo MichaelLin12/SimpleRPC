@@ -13,7 +13,6 @@ Get a read only view of the internal *buffer*
 - `Message(Msg type, std::size_t size)`
 
 Constructor constructs a Message. Note that type and size are automatically added to the buffer. 
-
 size = size_bytes(type) + size_bytes(size) + size_bytes(data)
 
 - `std::size_t getSize() const`
