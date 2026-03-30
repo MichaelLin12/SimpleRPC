@@ -9,11 +9,11 @@
 - Optimize for performace
 - ~~Logging - update logging to use fmt::println~~
 - rpcCompliant support
-- avoid having the main thread and worker thread share a socket at the same time by using epolloneshot and using a pipe backwards to deal with the situation
+- **avoid having the main thread and worker thread share a socket at the same time by using epolloneshot and using a pipe backwards to deal with the situation**
 - **use std::byte and uint8_t in the messages**
 - use a queue for logging
 - stop using std::size_t for size as its not fixed across architectures
-- **ensure const correctness**
-- **add/delete copy and move functions**
+- ~~ensure const correctness~~
+- ~~add/delete copy and move functions~~
 - auto manage dependencies
 - update bash build script
