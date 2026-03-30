@@ -6,3 +6,4 @@
 #define MAX_EVENTS 64
 #define TIMEOUT 30000
 #define BUFFERSIZE 10
+#define RESET "\033[0m"

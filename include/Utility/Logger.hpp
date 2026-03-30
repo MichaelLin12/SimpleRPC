@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/Constants.hpp"
 #include <cerrno>
 #include <chrono>
 #include <cstring>
@@ -13,8 +14,8 @@
 #define LOGGING(x, ...)                                                        \
     do                                                                         \
     {                                                                          \
-        std::string a = fmt::format("{} PID:{} TID:{} ", __FILE_NAME__,        \
-                                    getpid(), gettid()) +                      \
+        std::string a = fmt::format("{} PID:{} TID:{} {}", __FILE_NAME__,      \
+                                    getpid(), gettid(), RESET) +               \
                         fmt::format(__VA_ARGS__);                              \
         logger((x), a);                                                        \
     } while (0)
