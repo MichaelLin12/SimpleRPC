@@ -7,7 +7,7 @@
 - Heart Beats - allow for multiple servers to be spun up allow for detection of heartbeating
 - Data Sharing - enable multiple servers to gossip data back and forth about the different connections and functions registered
 - Optimize for performace
-- ~~Logging - update logging to use fmt::println~~
+- ~~Logging - update logging to use fmt::print~~
 - rpcCompliant support
 - **avoid having the main thread and worker thread share a socket at the same time by using epolloneshot and using a pipe backwards to deal with the situation**
 - **use std::byte and uint8_t in the messages**
