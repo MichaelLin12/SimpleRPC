@@ -4,7 +4,6 @@
 #include "Msg/Message.hpp"
 #include "Utility/Helper.hpp"
 #include "Utility/TransCeive.hpp"
-#include <concepts>
 #include <string>
 #include <type_traits>
 
@@ -48,22 +47,6 @@ public:
             }
         }
         return rt;
-    }
-
-    template <typename T>
-        requires(std::integral<T> || std::same_as<T, bool> ||
-                 std::same_as<T, char>)
-    std::size_t getSize(T arg)
-    {
-        (void)arg;
-        return sizeof(T);
-    }
-
-    template <typename T>
-        requires(std::same_as<T, std::string>)
-    std::size_t getSize(T arg)
-    {
-        return sizeof(std::size_t) + arg.size();
     }
 
     ~Client();

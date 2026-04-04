@@ -3,20 +3,19 @@ project(MyRPCSys VERSION 1.0 LANGUAGES CXX)
 
 option(SIMPLERPC_ENABLE_LOGGING "Enable logging" OFF)
 option(SIMPLERPC_BUILD_SAMPLES "Build sample programs" ON)
-option(SIMPLERPC_RELEASE "build for release" ON)
+option(SIMPLERPC_RELEASE "build for release" OFF)
 option(SIMPLERPC_DEBUGGING "Add Debugging Flags" OFF)
 option(SIMPLERPC_THREAD_SANITIZER "Add Thread Sanitizer to Debug Build" OFF)
 option(SIMPLERPC_ADDRESS_SANITIZER "Add Address Sanitizer to Debug Build" OFF)
 
 add_library(simplerpc_common INTERFACE)
-target_compile_features(simplerpc_common INTERFACE cxx_std_23)
+target_compile_features(simplerpc_common INTERFACE)
+target_compile_options(simplerpc_common INTERFACE -std=c++23)
 target_include_directories(simplerpc_common INTERFACE include)
 
 if(SIMPLERPC_ENABLE_LOGGING)
     target_compile_definitions(simplerpc_common INTERFACE ENABLELOGGING)
 endif()
-
-add_subdirectory(src)
 
 if(SIMPLERPC_BUILD_SAMPLES)
     add_subdirectory(sample)
@@ -40,3 +39,5 @@ if(SIMPLERPC_RELEASE)
     target_compile_definitions(simplerpc_common INTERFACE NDEBUG)
     target_link_options(simplerpc_common INTERFACE -flto)
 endif()
+
+add_subdirectory(src)

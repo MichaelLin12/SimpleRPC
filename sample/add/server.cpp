@@ -1,16 +1,16 @@
 #include "Server/Server.hpp"
-#include <iostream>
+#include "Error/ErrMessage.hpp"
+#include <expected>
 #include <string>
 
-int add(int x, int y){
-    return x+y;
-}
+std::expected<int, ErrMessage> add(int x, int y) { return x + y; }
 
-int main(){
+int main()
+{
     Server s{};
     s.create();
     std::string sp = "add";
-    s.registerFunction(sp,add);
+    s.registerFunction(sp, add);
     s.run();
     return 0;
 }

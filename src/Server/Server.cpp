@@ -117,8 +117,8 @@ void Server::run()
         LOGGING(LogLevel::INFO, "{} ready events", event_count);
         for (i = 0; i < event_count; i++)
         {
-            LOGGING(LogLevel::INFO, "Reading file descriptor: {}",
-                    events[i].data.fd);
+            int fd = events[i].data.fd;
+            LOGGING(LogLevel::INFO, "Reading file descriptor: {}", fd);
             if (events[i].data.fd == sockfd) [[likely]]
             {
                 // we have a new connection

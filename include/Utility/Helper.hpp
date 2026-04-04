@@ -4,8 +4,25 @@
 #include "Utility/Helper.hpp"
 #include "Utility/Logger.hpp"
 #include "Utility/TransCeive.hpp"
+#include <concepts>
 #include <fcntl.h>
+#include <string>
 #include <sys/epoll.h>
+
+template <typename T>
+    requires(std::integral<T> || std::same_as<T, bool> || std::same_as<T, char>)
+inline std::size_t getSize(T arg)
+{
+    (void)arg;
+    return sizeof(T);
+}
+
+template <typename T>
+    requires(std::same_as<T, std::string>)
+inline std::size_t getSize(T arg)
+{
+    return sizeof(std::size_t) + arg.size();
+}
 
 inline void setNonBlocking(int sockfd)
 {
