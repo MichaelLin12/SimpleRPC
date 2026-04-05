@@ -11,12 +11,15 @@ release
 *.o
 *.so
 *.a
+llvm*
+analysis/lock-free/testSQ2
+analysis/lock-free/testS2Q2
+analysis/lock-free/test2SQ2
+Claude.md
+Agents.md
 
 #ignore vscode configurations
 .vscode
 server
 client
-llvm*
-analysis/lock-free/testSQ2
-analysis/lock-free/testS2Q2
-analysis/lock-free/test2SQ2
+
