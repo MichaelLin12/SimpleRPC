@@ -1,9 +1,11 @@
 #pragma once
 #include "Codec/Decoder.hpp"
 #include "Codec/Encoder.hpp"
+#include "Error/ErrMessage.hpp"
 #include "Msg/Message.hpp"
 #include "Utility/Helper.hpp"
 #include "Utility/TransCeive.hpp"
+#include <expected>
 #include <string>
 #include <type_traits>
 
@@ -14,7 +16,7 @@ public:
     void create();
 
     template <typename R, typename... Args>
-    R call(std::string& funcName, Args&&... args)
+    std::expected<R, ErrMessage> call(std::string& funcName, Args&&... args)
     {
         std::size_t size = sizeof(size_t) + getSize(funcName) +
                            (getSize<std::remove_cvref_t<Args>>(args) + ...) + 1;
@@ -25,34 +27,30 @@ public:
         Message rec = receiveMsg(sockfd);
         rec.setOffset(sizeof(static_cast<uint8_t>(rec.getType())) +
                       sizeof(rec.getSize()));
-        R rt{}; // assume default constructible for now
         switch (rec.getType())
         {
             case Msg::Resp:
             {
-                rt = decoder.decode<R>(rec);
-                break;
+                return decoder.decode<R>(rec);
             }
             case Msg::Err:
             {
-                break;
+                return std::unexpected{ErrMessage{"Nothing"}};
             }
             case Msg::Void:
             {
-                break;
-            }
-            default:
-            {
-                break;
+                return {};
             }
         }
-        return rt;
-    }
+        return std::unexpected
+        {
+            ErrMessage{"The Server didn't return a valid message type"};
+        }
 
-    ~Client();
+        ~Client();
 
-private:
-    int sockfd;
-    Encoder encoder;
-    Decoder decoder;
-};
+    private:
+        int sockfd;
+        Encoder encoder;
+        Decoder decoder;
+    };
