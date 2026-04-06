@@ -42,15 +42,14 @@ public:
                 return {};
             }
         }
-        return std::unexpected
-        {
-            ErrMessage{"The Server didn't return a valid message type"};
-        }
+        return std::unexpected{
+            ErrMessage{"The Server didn't return a valid message type"}};
+    }
 
-        ~Client();
+    ~Client();
 
-    private:
-        int sockfd;
-        Encoder encoder;
-        Decoder decoder;
-    };
+private:
+    int sockfd;
+    Encoder encoder;
+    Decoder decoder;
+};
