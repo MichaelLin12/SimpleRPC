@@ -30,7 +30,7 @@ void dispatcher(void* fptr, int socket, Message& m)
 
     ExpectedRet result = std::apply(func, arguments);
 
-    if (!result.has_value())
+    if (!result)
     {
         std::string errStr = result.error().message;
         Message errM{Msg::Err, 1 + sizeof(std::size_t) + getSize(errStr)};
