@@ -41,6 +41,10 @@ public:
             {
                 return {};
             }
+            default:
+            {
+                std::unreachable();
+            }
         }
         return std::unexpected{
             ErrMessage{"The Server didn't return a valid message type"}};
