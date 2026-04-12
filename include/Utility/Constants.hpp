@@ -7,3 +7,4 @@
 #define TIMEOUT 30000
 #define BUFFERSIZE 10
 #define RESET "\033[0m"
+#define MSGTYPESIZE 1

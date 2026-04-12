@@ -1,5 +1,6 @@
 #include "Msg/Message.hpp"
 #include "Msg/MessageTypes.hpp"
+#include "Utility/Constants.hpp"
 #include <array>
 #include <bit>
 #include <cstring>
@@ -19,7 +20,7 @@ Message::Message(Msg type, std::size_t size)
     {
         addData(size);
     }
-    offset = 1 + sizeof(size);
+    offset = MSGTYPESIZE + sizeof(size);
 }
 
 std::span<const std::byte> Message::getBuffer() const { return buffer; }

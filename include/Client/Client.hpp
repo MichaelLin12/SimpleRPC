@@ -19,7 +19,8 @@ public:
     std::expected<R, ErrMessage> call(std::string& funcName, Args&&... args)
     {
         std::size_t size = sizeof(size_t) + getSize(funcName) +
-                           (getSize<std::remove_cvref_t<Args>>(args) + ...) + 1;
+                           (getSize<std::remove_cvref_t<Args>>(args) + ...) +
+                           MSGTYPESIZE;
         Message m{Msg::Send, size};
         encoder.encode(funcName, m);
         (encoder.encode<std::remove_cvref_t<Args>>(args, m), ...);
