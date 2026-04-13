@@ -3,7 +3,7 @@
 #include <expected>
 #include <string>
 
-std::expected<void, ErrMessage> doNothing(void) { return; }
+std::expected<void, ErrMessage> doNothing() { return {}; }
 
 int main()
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include "Msg/Message.hpp"
 #include "Msg/MessageTypes.hpp"
+#include "Utility/Constants.hpp"
 #include "Utility/Helper.hpp"
 #include "Utility/Logger.hpp"
 #include "Utility/TransCeive.hpp"
@@ -43,6 +44,10 @@ inline Message receiveMsg(int socket)
     LOGGING(LogLevel::INFO, "Message::receiveMsg");
     Msg type = receiveMsgType(socket);
     LOGGING(LogLevel::INFO, "Msg type is: {}", static_cast<uint8_t>(type));
+    if (type == Msg::Void)
+    {
+        return {type, MSGTYPESIZE};
+    }
     std::size_t sz = receiveSize(socket);
     Message rec{type, sz};
     LOGGING(LogLevel::DEBUG, "rec size: {}", rec.getSize());

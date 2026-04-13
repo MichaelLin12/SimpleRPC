@@ -4,6 +4,7 @@
 #include "Codec/Encoder.hpp"
 #include "Error/ErrMessage.hpp"
 #include "Msg/Message.hpp"
+#include "Utility/Constants.hpp"
 #include "Utility/Handler.hpp"
 #include "Utility/Helper.hpp"
 #include "Utility/Logger.hpp"
@@ -25,15 +26,16 @@ void dispatcher(void* fptr, int socket, Message& m)
     Decoder decoder{};
     Encoder encoder{};
 
-    std::tuple<std::decay_t<Args>...> arguments{
-        decoder.decode<std::decay_t<Args>>(m)...};
+    std::tuple<std::remove_cvref_t<Args>...> arguments{
+        decoder.decode<std::remove_cvref_t<Args>>(m)...};
 
     ExpectedRet result = std::apply(func, arguments);
 
     if (!result)
     {
         std::string errStr = result.error().message;
-        Message errM{Msg::Err, 1 + sizeof(std::size_t) + getSize(errStr)};
+        Message errM{Msg::Err,
+                     MSGTYPESIZE + sizeof(std::size_t) + getSize(errStr)};
         encoder.encode(errStr, errM);
         sendAll(socket, errM);
         return;
@@ -41,13 +43,13 @@ void dispatcher(void* fptr, int socket, Message& m)
 
     if constexpr (std::is_void_v<Ret>)
     {
-        Message voidM{Msg::Void, 1};
+        Message voidM{Msg::Void, MSGTYPESIZE};
         sendAll(socket, voidM);
     }
     else
     {
-        Message retM{Msg::Resp,
-                     1 + sizeof(std::size_t) + getSize(result.value())};
+        Message retM{Msg::Resp, MSGTYPESIZE + sizeof(std::size_t) +
+                                    getSize(result.value())};
         encoder.encode(result.value(), retM);
         sendAll(socket, retM);
     }

@@ -1,9 +1,14 @@
 #include "Server/Server.hpp"
 #include "Error/ErrMessage.hpp"
+#include "Utility/Logger.hpp"
 #include <expected>
 #include <string>
 
-std::expected<int, ErrMessage> add(int x, int y) { return x + y; }
+std::expected<int, ErrMessage> add(int x, int y)
+{
+    LOGGING(LogLevel::INFO, "Calling Add with parameters {} {}", x, y);
+    return x + y;
+}
 
 int main()
 {
