@@ -43,7 +43,7 @@ void dispatcher(void* fptr, int socket, Message& m)
 
     if constexpr (std::is_void_v<Ret>)
     {
-        Message voidM{Msg::Void, MSGTYPESIZE};
+        Message voidM{Msg::Void, MSGTYPESIZE + sizeof(std::size_t)};
         sendAll(socket, voidM);
     }
     else

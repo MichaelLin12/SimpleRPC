@@ -44,11 +44,11 @@ inline Message receiveMsg(int socket)
     LOGGING(LogLevel::INFO, "Message::receiveMsg");
     Msg type = receiveMsgType(socket);
     LOGGING(LogLevel::INFO, "Msg type is: {}", static_cast<uint8_t>(type));
+    std::size_t sz = receiveSize(socket);
     if (type == Msg::Void)
     {
         return {type, MSGTYPESIZE};
     }
-    std::size_t sz = receiveSize(socket);
     Message rec{type, sz};
     LOGGING(LogLevel::DEBUG, "rec size: {}", rec.getSize());
     LOGGING(LogLevel::DEBUG, "rec offset: {}", rec.getOffset());
