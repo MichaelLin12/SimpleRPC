@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(SimpleRPC VERSION 1.0 LANGUAGES CXX)
-
+include(FetchContent)
 option(SIMPLERPC_ENABLE_LOGGING "Enable logging" OFF)
 option(SIMPLERPC_BUILD_SAMPLES "Build sample programs" ON)
 option(SIMPLERPC_RELEASE "build for release" OFF)
@@ -9,6 +9,7 @@ option(SIMPLERPC_THREAD_SANITIZER "Add Thread Sanitizer to Debug Build" OFF)
 option(SIMPLERPC_ADDRESS_SANITIZER "Add Address Sanitizer to Debug Build" OFF)
 
 
+FetchContent_MakeAvailable(boost)
 add_library(simplerpc_common INTERFACE)
 target_compile_options(simplerpc_common INTERFACE -std=c++23)
 target_include_directories(simplerpc_common INTERFACE include)
