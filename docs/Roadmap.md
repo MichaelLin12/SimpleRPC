@@ -15,7 +15,7 @@
 - stop using std::size_t for size as its not fixed across architectures
 - ~~ensure const correctness~~
 - ~~add/delete copy and move functions~~
-- auto manage dependencies
-- update bash build script
+- ~~auto manage dependencies~~
+- ~~update bash build script~~
 - **When there is a failure in the worker thread, it shouldn't be fatal**
 - **Build a connection registry to track all connections**
