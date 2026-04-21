@@ -170,9 +170,9 @@ void Server::createWorkerThread()
         m.setOffset(sizeof(static_cast<uint8_t>(m.getType())) +
                     sizeof(m.getSize()));
         std::string name = decoder.decode<std::string>(m);
-        auto handler = functions[name]; // assume always true for now
-        handler.call(handler.functionPointer, new_fd,
-                     m); // assume works as intended for now -- as in no errors
+        functions.visit(
+            name, [&](auto& entry)
+            { entry.second.call(entry.second.functionPointer, new_fd, m); });
     };
 
     auto worker = [this, fn](std::stop_token stoken)

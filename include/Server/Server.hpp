@@ -9,12 +9,11 @@
 #include "Utility/Helper.hpp"
 #include "Utility/Logger.hpp"
 #include "Utility/TransCeive.hpp"
+#include <boost/unordered/concurrent_flat_map.hpp>
 #include <expected>
 #include <functional>
-#include <map>
 #include <string>
 #include <thread>
-#include <tuple>
 #include <type_traits>
 
 template <typename Ret, typename... Args>
@@ -67,15 +66,15 @@ public:
     template <typename Ret, typename... Args>
     void registerFunction(std::string key,
                           std::expected<Ret, ErrMessage> (*func)(Args... args))
-    { // potential race here
-        functions.insert(std::make_pair(
+    {
+        functions.emplace(
             std::move(key),
-            Handler{&dispatcher<Ret, Args...>, reinterpret_cast<void*>(func)}));
+            Handler{&dispatcher<Ret, Args...>, reinterpret_cast<void*>(func)});
     }
 
 private:
     int sockfd;
-    std::map<std::string, Handler> functions;
+    boost::unordered::concurrent_flat_map<std::string, Handler> functions;
     SQBuff<int> buffer;
     std::jthread workerThread;
 };
