@@ -8,8 +8,6 @@ option(SIMPLERPC_DEBUGGING "Add Debugging Flags" OFF)
 option(SIMPLERPC_THREAD_SANITIZER "Add Thread Sanitizer to Debug Build" OFF)
 option(SIMPLERPC_ADDRESS_SANITIZER "Add Address Sanitizer to Debug Build" OFF)
 
-
-FetchContent_MakeAvailable(boost)
 add_library(simplerpc_common INTERFACE)
 target_compile_options(simplerpc_common INTERFACE -std=c++23)
 target_include_directories(simplerpc_common INTERFACE include)
