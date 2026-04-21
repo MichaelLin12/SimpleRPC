@@ -1,43 +1,53 @@
-#!/bin/sh
-set -e
+#!/bin/bash
+set -euo pipefail
 
 dir=$PWD
-build="build"
-build_logging="build_logging"
-build_debugging="build_debugging"
-build_debugging_threads="build_debugging_threads"
-build_debugging_address="build_debugging_address"
-release="release"
 
-rm -rf  $build $build_logging $build_debugging $build_debugging_threads $build_debugging_address $release
-mkdir -p $build $build_logging $build_debugging $build_debugging_threads $build_debugging_address $release
+build(){
+    local name=$1
+    local flags=$2
 
-cd "$dir/$build"
-cmake -DCMAKE_CXX_COMPILER=g++-14 ..
-cmake --build .
-cd ..
+    rm -rf "$name"
+    mkdir -p "$name"
+    cd "$dir/$name"
+    cmake $flags -DCMAKE_CXX_COMPILER=g++-14 ..
+    cmake --build .
+    cd "$dir"
+}
 
-cd "$dir/$build_logging"
-cmake -DSIMPLERPC_ENABLE_LOGGING=ON -DCMAKE_CXX_COMPILER=g++-14 ..
-cmake --build .
-cd ..
+select_build(){
+    printf "%s\n" "Select build type:"
+    printf "%s\n" "1) Default"
+    printf "%s\n" "2) Logging"
+    printf "%s\n" "3) Debugging"
+    printf "%s\n" "4) Debugging + Thread Sanitizer"
+    printf "%s\n" "5) Debugging + Address Sanitizer"
+    printf "%s\n" "6) Release"
+    printf "%s\n" "7) All"
 
-cd "$dir/$build_debugging"
-cmake -DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON -DCMAKE_CXX_COMPILER=g++-14 ..
-cmake --build .
-cd ..
+    read -r choice
 
-cd "$dir/$build_debugging_threads"
-cmake -DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON -DSIMPLERPC_THREAD_SANITIZER=ON -DCMAKE_CXX_COMPILER=g++-14 ..
-cmake --build .
-cd ..
+    case $choice in
+        1) build "build" "" ;;
+        2) build "build_logging" "-DSIMPLERPC_ENABLE_LOGGING=ON" ;;
+        3) build "build_debugging" "-DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON" ;;
+        4) build "build_debugging_threads" "-DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON -DSIMPLERPC_THREAD_SANITIZER=ON" ;;
+        5) build "build_debugging_address" "-DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON -DSIMPLERPC_ADDRESS_SANITIZER=ON" ;;
+        6) build "release" "-DSIMPLERPC_RELEASE=ON" ;;
+        7) 
+            build "build" ""
+            build "build_logging" "-DSIMPLERPC_ENABLE_LOGGING=ON"
+            build "build_debugging" "-DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON"
+            build "build_debugging_threads" "-DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON -DSIMPLERPC_THREAD_SANITIZER=ON"
+            build "build_debugging_address" "-DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON -DSIMPLERPC_ADDRESS_SANITIZER=ON"
+            build "release" "-DSIMPLERPC_RELEASE=ON"
+            ;;
+        *) printf "%s\n" "Invalid choice"; exit 1 ;;
+    esac
+}
 
-cd "$dir/$build_debugging_address"
-cmake -DSIMPLERPC_ENABLE_LOGGING=ON -DSIMPLERPC_DEBUGGING=ON -DSIMPLERPC_ADDRESS_SANITIZER=ON -DCMAKE_CXX_COMPILER=g++-14 ..
-cmake --build .
-cd ..
+main(){
+    select_build
+}
 
-cd "$dir/$release"
-cmake -DSIMPLERPC_RELEASE=ON -DCMAKE_CXX_COMPILER=g++-14 ..
-cmake --build .
-cd ..
+main

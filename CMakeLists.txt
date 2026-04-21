@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(SimpleRPC VERSION 1.0 LANGUAGES CXX)
-include(FetchContent)
 option(SIMPLERPC_ENABLE_LOGGING "Enable logging" OFF)
 option(SIMPLERPC_BUILD_SAMPLES "Build sample programs" ON)
 option(SIMPLERPC_RELEASE "build for release" OFF)
