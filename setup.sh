@@ -98,15 +98,6 @@ install_fmt(){
 }
 
 install_clang(){
-    printf "%s\n" "Installing clang-18"
-    wget https://apt.llvm.org/llvm.sh >/dev/null 2>&1
-    chmod +x llvm.sh
-    ./llvm.sh 18 >/dev/null 2>&1
-    rm llvm.sh
-    printf "%s\n" "clang-18 has been successfully installed"
-}
-
-install_clang(){
     printf "%s\n" "Installing clang++-18"
     wget https://apt.llvm.org/llvm.sh >/dev/null 2>&1
     chmod +x llvm.sh
