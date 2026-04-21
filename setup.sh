@@ -43,54 +43,38 @@ check_fmt(){
     fi
 }
 
+
 check_clang(){
-    printf "%s\n" "Checking if clang exists"
-    if [[ ! $(command -v clang) ]]; then
-        printf "%s\n" "clang does not exist"
+    printf "%s\n" "Checking if clang++ exists"
+    if [[ ! $(command -v clang++) ]]; then
+        printf "%s\n" "clang++ does not exist"
         return 1
     fi
 
-    local VERSION_CLANG="$(clang --version | head -n1 | awk '{print $3}' | cut -d'.' -f1)"
+    local VERSION_CLANG="$(clang++ --version | head -n1 | awk '{print $3}' | cut -d'.' -f1)"
     local VERSION="$(printf "%s\n" "18" "$VERSION_CLANG" | sort -V | head -n1)"
     if [[ "$VERSION" != "18" ]]; then
-        printf "%s\n" "clang is too old"
+        printf "%s\n" "clang++ is too old"
         return 1
     else
-        printf "%s\n" "clang is acceptable"
+        printf "%s\n" "clang++ is acceptable"
     fi
 }
 
 check_gcc(){
-    printf "%s\n" "Checking if gcc exists"
-    if [[ ! $(command -v g++-14) ]]; then
-        printf "%s\n" "gcc-14 does not exist"
+    printf "%s\n" "Checking if g++ exists"
+    if [[ ! $(command -v g++) ]]; then
+        printf "%s\n" "g++ does not exist"
         return 1
     fi
 
-    local VERSION_GCC="$(g++-14 --version | head -n1 | awk '{print $3}' | cut -d'.' -f1)"
+    local VERSION_GCC="$(g++ --version | head -n1 | awk '{print $3}' | cut -d'.' -f1)"
     local VERSION="$(printf "%s\n" "14" "$VERSION_GCC" | sort -V | head -n1)"
     if [[ "$VERSION" != "14" ]]; then
-        printf "%s\n" "gcc is too old"
+        printf "%s\n" "g++ is too old"
         return 1
     else
-        printf "%s\n" "gcc is acceptable"
-    fi
-}
-
-check_cmake(){
-    printf "%s\n" "Checking if cmake exists"
-    if [[ ! $(command -v cmake) ]]; then
-        printf "%s\n" "cmake does not exist"
-        return 1
-    fi
-
-    local VERSION_CMAKE="$(cmake --version | head -n1 | awk '{print $3}' | cut -d'.' -f1,2)"
-    local VERSION="$(printf "%s\n" "3.22" "$VERSION_CMAKE" | sort -V | head -n1)"
-    if [[ "$VERSION" != "3.22" ]]; then
-        printf "%s\n" "cmake is too old"
-        return 1
-    else
-        printf "%s\n" "cmake is acceptable"
+        printf "%s\n" "g++ is acceptable"
     fi
 }
 
@@ -122,21 +106,23 @@ install_clang(){
     printf "%s\n" "clang-18 has been successfully installed"
 }
 
+install_clang(){
+    printf "%s\n" "Installing clang++-18"
+    wget https://apt.llvm.org/llvm.sh >/dev/null 2>&1
+    chmod +x llvm.sh
+    ./llvm.sh 18 >/dev/null 2>&1
+    rm llvm.sh
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100 >/dev/null 2>&1
+    printf "%s\n" "clang++-18 has been successfully installed"
+}
+
 install_gcc(){
     printf "%s\n" "Installing gcc-14"
     add-apt-repository -y ppa:ubuntu-toolchain-r/test >/dev/null 2>&1
     apt update >/dev/null 2>&1
     apt install -y g++-14 >/dev/null 2>&1
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100 >/dev/null 2>&1
     printf "%s\n" "gcc-14 has been successfully installed"
-}
-
-install_cmake(){
-    printf "%s\n" "Installing cmake"
-    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - >/dev/null 2>&1
-    apt-add-repository -y "deb https://apt.kitware.com/ubuntu/ focal main" >/dev/null 2>&1
-    apt update >/dev/null 2>&1
-    apt install -y cmake >/dev/null 2>&1
-    printf "%s\n" "cmake has been successfully installed"
 }
 
 main(){
