@@ -20,7 +20,14 @@ inline std::size_t getSize(T arg)
 
 template <typename T>
     requires(std::same_as<T, std::string>)
-inline std::size_t getSize(T arg)
+inline std::size_t getSize(const T& arg)
+{
+    return sizeof(std::size_t) + arg.size();
+}
+
+template <typename T>
+    requires(rpcCompliant<T>)
+inline std::size_t getSize(const T&& arg)
 {
     return sizeof(std::size_t) + arg.size();
 }

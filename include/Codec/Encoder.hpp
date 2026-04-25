@@ -1,5 +1,6 @@
 #pragma once
 #include "Msg/Message.hpp"
+#include "Utility/rpcCompliant.hpp"
 #include <array>
 #include <bit>
 #include <concepts>
@@ -33,5 +34,10 @@ public:
         msg.addData(arg);
     }
 
-    // object must have encode function as well
+    template <typename T>
+        requires(rpcCompliant<T>)
+    void encode(T& arg, Message& msg)
+    {
+        arg.serialize(msg);
+    }
 };
