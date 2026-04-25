@@ -49,4 +49,15 @@ public:
                 value);
         return value;
     }
+
+    template <typename T>
+        requires(rpcCompliant<T>)
+    T decode(Message& m)
+    {
+        auto buffer = m.getBuffer();
+        T value{};
+        value.deserialize(m);
+        m.setOffset(m.getOffset() + value.size());
+        return value;
+    }
 };

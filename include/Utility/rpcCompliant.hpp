@@ -7,6 +7,7 @@
 template <typename T>
 concept rpcCompliant = requires(T x, Message& m) {
     requires std::is_class_v<T>;
+    requires std::is_default_constructible_v<T>;
     { x.serialize(m) } -> std::same_as<void>;
     { x.deserialize(m) } -> std::same_as<T>;
     { x.size() } -> std::same_as<std::size_t>;
