@@ -11,35 +11,19 @@ check_root(){
 
 check_boost(){
     printf "%s\n" "Checking if the boost library exists"
-    local VERSION_BOOST="$(dpkg -l | grep libboost-dev | awk '{print $3}' | cut -d'.' -f1,2)"
-    if [[ -z "$VERSION_BOOST" ]]; then
+    local BOOST_FOLDER="/usr/include/boost"
+    if [[ ! -e "$BOOST_FOLDER" ]]; then
         printf "%s\n" "Boost library does not exist"
         return 1
-    fi
-
-    local VERSION="$(printf "%s\n" "1.83" "$VERSION_BOOST" | sort -V | head -n1)"
-    if [[ "$VERSION" != "1.83" ]]; then
-        printf "%s\n" "Boost library is too old"
-        return 1
-    else
-        printf "%s\n" "Boost library is acceptable"
     fi
 }
 
 check_fmt(){
     printf "%s\n" "Checking if fmt exists"
-    local VERSION_FMT="$(dpkg -l | grep libfmt-dev | awk '{print $3}' | cut -d'.' -f1)"
-    if [[ -z "$VERSION_FMT" ]]; then
+    local FMT_LIBRARY="/usr/include/fmt"
+    if [[ ! -e "$FMT_LIBRARY" ]]; then
         printf "%s\n" "fmt library does not exist"
         return 1
-    fi
-
-    local VERSION="$(printf "%s\n" "12" "$VERSION_FMT" | sort -V | head -n1)"
-    if [[ "$VERSION" != "12" ]]; then
-        printf "%s\n" "fmt library is too old"
-        return 1
-    else
-        printf "%s\n" "fmt library is acceptable"
     fi
 }
 
@@ -50,15 +34,6 @@ check_clang(){
         printf "%s\n" "clang++ does not exist"
         return 1
     fi
-
-    local VERSION_CLANG="$(clang++ --version | head -n1 | awk '{print $3}' | cut -d'.' -f1)"
-    local VERSION="$(printf "%s\n" "18" "$VERSION_CLANG" | sort -V | head -n1)"
-    if [[ "$VERSION" != "18" ]]; then
-        printf "%s\n" "clang++ is too old"
-        return 1
-    else
-        printf "%s\n" "clang++ is acceptable"
-    fi
 }
 
 check_gcc(){
@@ -67,15 +42,15 @@ check_gcc(){
         printf "%s\n" "g++ does not exist"
         return 1
     fi
+}
 
-    local VERSION_GCC="$(g++ --version | head -n1 | awk '{print $3}' | cut -d'.' -f1)"
-    local VERSION="$(printf "%s\n" "14" "$VERSION_GCC" | sort -V | head -n1)"
-    if [[ "$VERSION" != "14" ]]; then
-        printf "%s\n" "g++ is too old"
+check_cmake(){
+    printf "%s\n" "Checking if cmake exists"
+    if [[ ! $(command -v cmake) ]]; then
+        printf "%s\n" "cmake doesn't exist"
         return 1
-    else
-        printf "%s\n" "g++ is acceptable"
     fi
+
 }
 
 install_boost(){
@@ -98,22 +73,23 @@ install_fmt(){
 }
 
 install_clang(){
-    printf "%s\n" "Installing clang++-18"
-    wget https://apt.llvm.org/llvm.sh >/dev/null 2>&1
-    chmod +x llvm.sh
-    ./llvm.sh 18 >/dev/null 2>&1
-    rm llvm.sh
-    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100 >/dev/null 2>&1
-    printf "%s\n" "clang++-18 has been successfully installed"
+    printf "%s\n" "Installing clang++"
+    apt update &> /dev/null && apt upgrade &> /dev/null && apt install -y clang  &> /dev/null
+    printf "%s\n" "clang++ been successfully installed"
 }
 
 install_gcc(){
-    printf "%s\n" "Installing gcc-14"
-    add-apt-repository -y ppa:ubuntu-toolchain-r/test >/dev/null 2>&1
-    apt update >/dev/null 2>&1
-    apt install -y g++-14 >/dev/null 2>&1
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100 >/dev/null 2>&1
-    printf "%s\n" "gcc-14 has been successfully installed"
+    printf "%s\n" "Installing gcc"
+    apt update &> /dev/null && apt upgrade &> /dev/null && apt install -y build-essentials &> /dev/null
+    printf "%s\n" "gcc has been successfully installed"
+}
+
+install_cmake(){
+    print "%s\n" "Installing cmake"
+    apt update &> /dev/null
+    apt upgrade &> /dev/null
+    apt install -y cmake &> /dev/null
+    printf"%s\n" "CMake has successfully been installed"
 }
 
 main(){

@@ -10,7 +10,7 @@ build(){
     rm -rf "$name"
     mkdir -p "$name"
     cd "$dir/$name"
-    cmake $flags -DCMAKE_CXX_COMPILER=g++-14 ..
+    cmake $flags -DCMAKE_CXX_COMPILER=g++ ..
     cmake --build .
     cd "$dir"
 }
